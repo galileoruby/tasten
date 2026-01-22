@@ -1,0 +1,24 @@
+<p-breadcrumb [model]="items" [home]="homeWithIcon" />
+<p-tabs value="0">
+  <p-tablist>
+    <p-tab value="0">Jugar</p-tab>
+    <p-tab value="1">Inicio</p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <p-tabpanel value="0">
+      <div class="grid m-1 p-1">
+        <div class="col-12 md:col-6 lg:col-4">
+          <app-carrera> </app-carrera>
+        </div>
+      </div>
+      <div class="grid m-1 p-1">
+        <div class="col-12 md:col-6 lg:col-4">
+          <app-keyboard />
+        </div>
+      </div>
+    </p-tabpanel>
+    <p-tabpanel value="1">
+      <p class="m-0">HOla buenos dias , soy pollito</p>
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>

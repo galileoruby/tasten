@@ -1,0 +1,47 @@
+// Fuentes monoespaciadas
+@font-family-mono: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+@font-family-code: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+@font-family-jetbrains: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+
+/* En tu archivo de estilos */
+.caracter-actual {
+  background-color: #d9f3d9;
+  color: #000;
+  font-family: @font-family-mono;
+  // font-weight: bold;
+  // font-size: 19px;
+  // padding: 1px 1px;
+  // border-radius: 3px;
+  animation: pulse 1s infinite;
+}
+
+.caracter-correcto {
+  color: #28a745;
+}
+
+.caracter-incorrecto {
+  color: #dc3545;
+  text-decoration: line-through;
+}
+
+ 
+
+.texto-contenedor {
+  font-family: @font-family-mono;
+  font-size: 18px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.progreso {
+  margin-top: 20px;
+  position: relative;
+}
+
+.barra-progreso {
+  height: 8px;
+  background-color: #4CAF50;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}

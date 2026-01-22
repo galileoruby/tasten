@@ -1,0 +1,12 @@
+[package]
+name = "tekla-back"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-cors = "0.7.1"
+actix-web = "4.12.1"
+rand = "0.9.2"
+serde = "1.0.228"
+serde_json = "1.0.149"
+tokio = "1.49.0"

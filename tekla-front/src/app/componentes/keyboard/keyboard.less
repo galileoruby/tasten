@@ -1,0 +1,523 @@
+// ============================================
+// VARIABLES Y CONFIGURACIÓN
+// ============================================
+
+// Fuentes monoespaciadas
+@font-family-mono: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+@font-family-code: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+@font-family-jetbrains: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+// Colores base
+@color-red-primary: #dc2626;    // Rojo intenso
+@color-red-light: #fca5a5;      // Rojo claro
+@color-red-dark: #991b1b;       // Rojo oscuro
+@color-red-bg: #fef2f2;         // Fondo rojo claro
+
+@color-green-primary: #16a34a;  // Verde intenso
+@color-green-light: #86efac;    // Verde claro  
+@color-green-dark: #166534;     // Verde oscuro
+@color-green-bg: #f0fdf4;       // Fondo verde claro
+
+// Colores neutrales
+@color-black: #171717;
+@color-gray-dark: #404040;
+@color-gray-medium: #737373;
+@color-gray-light: #d4d4d4;
+@color-white: #ffffff;
+
+// Tamaños de fuente
+@font-size-xs: 0.75rem;     // 12px
+@font-size-sm: 0.875rem;    // 14px
+@font-size-base: 1rem;      // 16px
+@font-size-lg: 1.125rem;    // 18px
+@font-size-xl: 1.25rem;     // 20px
+@font-size-2xl: 1.5rem;     // 24px
+
+// Espaciado
+@line-height-tight: 1.25;
+@line-height-normal: 1.5;
+@line-height-loose: 1.75;
+
+// ============================================
+// CLASES BASE MONOESPACIADAS
+// ============================================
+
+.text-mono {
+  font-family: @font-family-mono;
+  font-size: @font-size-base;
+  line-height: @line-height-normal;
+  letter-spacing: -0.01em;
+}
+
+.text-mono-sm {
+  &:extend(.text-mono);
+  font-size: @font-size-sm;
+}
+
+.text-mono-lg {
+  &:extend(.text-mono);
+  font-size: @font-size-lg;
+}
+
+.text-mono-xl {
+  &:extend(.text-mono);
+  font-size: @font-size-xl;
+}
+
+// Variantes de fuente
+.text-mono-code {
+  font-family: @font-family-code;
+  font-size: @font-size-sm;
+  line-height: @line-height-normal;
+}
+
+.text-mono-jetbrains {
+  font-family: @font-family-jetbrains;
+  font-size: @font-size-base;
+  line-height: @line-height-normal;
+  font-feature-settings: "liga" 0, "calt" 0; // Desactiva ligaduras si prefieres
+}
+
+// ============================================
+// ESTILOS ROJOS
+// ============================================
+
+.text-red-mono {
+  &:extend(.text-mono);
+  color: @color-red-primary;
+  
+  // Variantes
+  &.light {
+    color: @color-red-light;
+  }
+  
+  &.dark {
+    color: @color-red-dark;
+  }
+  
+  // Con fondo
+  &.with-bg {
+    background-color: @color-red-bg;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+  
+  // Borde rojo
+  &.bordered {
+    border: 1px solid @color-red-light;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+  }
+  
+  // Sombra roja sutil
+  &.shadow {
+    text-shadow: 0 1px 2px fade(@color-red-primary, 20%);
+  }
+}
+
+// Rojo para código/errores
+.code-error {
+  &:extend(.text-mono-code);
+  color: @color-red-primary;
+  background-color: @color-red-bg;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid @color-red-primary;
+  border-radius: 0.25rem;
+  
+  .error-line {
+    color: @color-red-dark;
+    font-weight: 600;
+  }
+  
+  .error-message {
+    color: @color-gray-dark;
+    font-size: @font-size-sm;
+  }
+}
+
+// Rojo para advertencias
+.warning-mono {
+  &:extend(.text-mono);
+  color: @color-red-dark;
+  background-color: lighten(@color-red-bg, 2%);
+  padding: 0.75rem;
+  border: 1px solid @color-red-light;
+  border-radius: 0.375rem;
+  
+  &::before {
+    content: "⚠ ";
+    color: @color-red-primary;
+    font-weight: bold;
+  }
+}
+
+// ============================================
+// ESTILOS VERDES
+// ============================================
+
+.text-green-mono {
+  &:extend(.text-mono);
+  color: @color-green-primary;
+  
+  // Variantes
+  &.light {
+    color: @color-green-light;
+  }
+  
+  &.dark {
+    color: @color-green-dark;
+  }
+  
+  // Con fondo
+  &.with-bg {
+    background-color: @color-green-bg;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+  
+  // Borde verde
+  &.bordered {
+    border: 1px solid @color-green-light;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+  }
+  
+  // Sombra verde sutil
+  &.shadow {
+    text-shadow: 0 1px 2px fade(@color-green-primary, 20%);
+  }
+}
+
+// Verde para éxito/confirmaciones
+.code-success {
+  &:extend(.text-mono-code);
+  color: @color-green-primary;
+  background-color: @color-green-bg;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid @color-green-primary;
+  border-radius: 0.25rem;
+  
+  .success-line {
+    color: @color-green-dark;
+    font-weight: 600;
+  }
+  
+  .success-message {
+    color: @color-gray-dark;
+    font-size: @font-size-sm;
+  }
+}
+
+// Verde para información positiva
+.info-mono {
+  &:extend(.text-mono);
+  color: @color-green-dark;
+  background-color: lighten(@color-green-bg, 2%);
+  padding: 0.75rem;
+  border: 1px solid @color-green-light;
+  border-radius: 0.375rem;
+  
+  &::before {
+    content: "✓ ";
+    color: @color-green-primary;
+    font-weight: bold;
+  }
+}
+
+// ============================================
+// ESTILOS COMBINADOS ROJO/VERDE
+// ============================================
+
+// Comparación lado a lado
+.comparison-mono {
+  display: flex;
+  gap: 2rem;
+  font-family: @font-family-mono;
+  
+  .before {
+    flex: 1;
+    color: @color-red-primary;
+    background-color: @color-red-bg;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid @color-red-light;
+  }
+  
+  .after {
+    flex: 1;
+    color: @color-green-primary;
+    background-color: @color-green-bg;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid @color-green-light;
+  }
+}
+
+// Diferencias inline
+.diff-mono {
+  &:extend(.text-mono);
+  
+  .removed {
+    color: @color-red-primary;
+    background-color: @color-red-bg;
+    text-decoration: line-through;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.125rem;
+  }
+  
+  .added {
+    color: @color-green-primary;
+    background-color: @color-green-bg;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.125rem;
+    font-weight: 600;
+  }
+}
+
+// Terminal style
+.terminal-mono {
+  font-family: @font-family-code;
+  background-color: @color-black;
+  color: #00ff00; // Verde terminal clásico
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  
+  .terminal-error {
+    color: #ff5555; // Rojo terminal
+  }
+  
+  .terminal-success {
+    color: #55ff55; // Verde brillante terminal
+  }
+  
+  .terminal-prompt {
+    color: #ffff55; // Amarillo terminal
+  }
+  
+  .terminal-path {
+    color: #5555ff; // Azul terminal
+  }
+}
+
+// ============================================
+// UTILIDADES PARA CÓDIGO
+// ============================================
+
+// Bloque de código con colores
+.code-block {
+  font-family: @font-family-code;
+  font-size: @font-size-sm;
+  line-height: @line-height-loose;
+  background-color: #1e1e1e; // Fondo oscuro tipo VS Code
+  color: #d4d4d4; // Texto claro
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  tab-size: 2;
+  
+  // Colores sintaxis (puedes personalizar)
+  .keyword { color: #569cd6; }      // azul
+  .string  { color: #ce9178; }      // naranja
+  .comment { color: #6a9955; }      // verde
+  .number  { color: #b5cea8; }      // verde claro
+  .function{ color: #dcdcaa; }      // amarillo
+  .class   { color: #4ec9b0; }      // turquesa
+  
+  // Errores en código
+  .error-line {
+    background-color: fade(@color-red-primary, 15%);
+    border-left: 3px solid @color-red-primary;
+    padding-left: 0.5rem;
+    margin-left: -0.5rem;
+  }
+  
+  // Líneas correctas
+  .correct-line {
+    background-color: fade(@color-green-primary, 10%);
+    border-left: 3px solid @color-green-primary;
+    padding-left: 0.5rem;
+    margin-left: -0.5rem;
+  }
+}
+
+// ============================================
+// CLASES DE UTILIDAD
+// ============================================
+
+// Utilidades de color
+.text-red { color: @color-red-primary; }
+.text-red-light { color: @color-red-light; }
+.text-red-dark { color: @color-red-dark; }
+.bg-red { background-color: @color-red-bg; }
+
+.text-green { color: @color-green-primary; }
+.text-green-light { color: @color-green-light; }
+.text-green-dark { color: @color-green-dark; }
+.bg-green { background-color: @color-green-bg; }
+
+// Utilidades de peso
+.font-mono-bold { 
+  &:extend(.text-mono);
+  font-weight: 600; 
+}
+
+.font-mono-light { 
+  &:extend(.text-mono);
+  font-weight: 300; 
+}
+
+// Utilidades de alineación
+.text-mono-center {
+  &:extend(.text-mono);
+  text-align: center;
+}
+
+.text-mono-right {
+  &:extend(.text-mono);
+  text-align: right;
+}
+
+// Utilidades de espaciado
+.mono-tight {
+  line-height: @line-height-tight;
+  letter-spacing: -0.02em;
+}
+
+.mono-loose {
+  line-height: @line-height-loose;
+  letter-spacing: 0.02em;
+}
+
+// ============================================
+// EJEMPLOS DE APLICACIÓN
+// ============================================
+
+// Para logs de consola
+.console-log {
+  &:extend(.text-mono-sm);
+  
+  &.log-error {
+    color: @color-red-primary;
+    &::before { content: "[ERROR] "; }
+  }
+  
+  &.log-success {
+    color: @color-green-primary;
+    &::before { content: "[SUCCESS] "; }
+  }
+  
+  &.log-info {
+    color: @color-gray-medium;
+    &::before { content: "[INFO] "; }
+  }
+}
+
+// Para precios/finanzas
+.price-mono {
+  &:extend(.text-mono);
+  
+  &.positive {
+    color: @color-green-primary;
+    &::before { content: "+"; }
+  }
+  
+  &.negative {
+    color: @color-red-primary;
+  }
+}
+
+// Para validaciones
+.validation-mono {
+  &:extend(.text-mono-sm);
+  
+  .valid {
+    color: @color-green-primary;
+    &::before { content: "✓ "; }
+  }
+  
+  .invalid {
+    color: @color-red-primary;
+    &::before { content: "✗ "; }
+  }
+}
+
+// ============================================
+// MIXINS REUTILIZABLES
+// ============================================
+
+// Mixin para texto mono rojo
+.mono-red-text(@size: @font-size-base, @weight: normal) {
+  font-family: @font-family-mono;
+  font-size: @size;
+  font-weight: @weight;
+  color: @color-red-primary;
+  line-height: @line-height-normal;
+}
+
+// Mixin para texto mono verde
+.mono-green-text(@size: @font-size-base, @weight: normal) {
+  font-family: @font-family-mono;
+  font-size: @size;
+  font-weight: @weight;
+  color: @color-green-primary;
+  line-height: @line-height-normal;
+}
+
+// Mixin para cajas de código
+.mono-code-box(@bg-color: #1e1e1e, @text-color: #d4d4d4) {
+  font-family: @font-family-code;
+  font-size: @font-size-sm;
+  background-color: @bg-color;
+  color: @text-color;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+
+@media (max-width: 768px) {
+  .text-mono {
+    font-size: @font-size-sm;
+  }
+  
+  .text-mono-lg {
+    font-size: @font-size-base;
+  }
+  
+  .comparison-mono {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .code-block {
+    padding: 1rem;
+    font-size: 0.8125rem; // 13px
+  }
+}
+
+// ============================================
+// DARK MODE SUPPORT
+// ============================================
+
+@media (prefers-color-scheme: dark) {
+  .text-red-mono.with-bg {
+    background-color: darken(@color-red-primary, 60%);
+  }
+  
+  .text-green-mono.with-bg {
+    background-color: darken(@color-green-primary, 60%);
+  }
+  
+  .code-error {
+    background-color: darken(@color-red-primary, 65%);
+  }
+  
+  .code-success {
+    background-color: darken(@color-green-primary, 65%);
+  }
+}

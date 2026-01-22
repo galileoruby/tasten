@@ -1,0 +1,212 @@
+// ============================================
+// CONTAINER CON MÁRGENES EN EM
+// ============================================
+
+// Tamaño base (normalmente 16px del navegador)
+@base-font-size: 16px;
+@em-base: 1em; // = @base-font-size
+
+// Definir márgenes en em
+@margin-em-desktop: 2em;    // ~32px
+@margin-em-tablet: 1.5em;   // ~24px  
+@margin-em-mobile: 1em;     // ~16px
+
+.container-em-responsive {
+  // Reset box model
+  box-sizing: border-box;
+  display: block;
+  
+  // Mobile first
+  margin-left: @margin-em-mobile;
+  margin-right: @margin-em-mobile;
+  width: calc(100% - (2 * @margin-em-mobile));
+  padding: 1em;
+  
+  // Tablet (≥ 768px)
+  @media (min-width: 48em) { // 48em = 768px / 16
+    margin-left: @margin-em-tablet;
+    margin-right: @margin-em-tablet;
+    width: calc(100% - (2 * @margin-em-tablet));
+    padding: 1.5em;
+  }
+  
+  // Desktop (≥ 1024px)
+  @media (min-width: 64em) { // 64em = 1024px / 16
+    margin-left: @margin-em-desktop;
+    margin-right: @margin-em-desktop;
+    width: calc(100% - (2 * @margin-em-desktop));
+    padding: 2em;
+    
+    // Opcional: límite máximo de ancho
+    max-width: 120em; // 1920px / 16
+    margin-left: auto;
+    margin-right: auto;
+    
+    // Padding lateral adicional si es necesario
+    padding-left: @margin-em-desktop;
+    padding-right: @margin-em-desktop;
+  }
+  
+  // Pantallas muy grandes (≥ 1920px)
+  @media (min-width: 120em) { // 120em = 1920px / 16
+    // Mantener márgenes consistentes, no hacerlos más grandes
+    max-width: 160em; // 2560px / 16
+  }
+  
+  // 4K y superiores
+  @media (min-width: 240em) { // 240em = 3840px / 16
+    max-width: 200em; // 3200px / 16
+  }
+}
+
+// ============================================
+// VERSIÓN CON CLAMP() + EM (RECOMENDADA)
+// ============================================
+
+.container-modern {
+  // clamp(min-em, porcentaje-ideal, max-em)
+  margin-left: clamp(1em, 2%, 3em);
+  margin-right: clamp(1em, 2%, 3em);
+  width: calc(100% - (2 * clamp(1em, 2%, 3em)));
+  
+  /* Esto significa:
+     - Mínimo: 1em (16px) - nunca menos que esto
+     - Ideal: 2% del viewport - mientras sea entre 1em y 3em
+     - Máximo: 3em (48px) - nunca más que esto
+     
+     En 4K: 2% sería 76.8px, pero clamp lo limita a 48px (3em)
+  */
+}
+
+// ============================================
+// SISTEMA COMPLETO DE ESPACIADO EN EM
+// ============================================
+
+// Definir escala de espaciado
+@spacing-scale: 0.25em, 0.5em, 1em, 1.5em, 2em, 3em, 4em, 6em, 8em;
+
+.container-em-system {
+  // Espaciado basado en la escala
+  @margin-side: 2em; // Nivel 5 de la escala
+  
+  margin-left: @margin-side;
+  margin-right: @margin-side;
+  width: calc(100% - (2 * @margin-side));
+  
+  // Padding interno también en em
+  padding: 1.5em;
+  
+  // Responsive con em
+  @media (max-width: 60em) { // 960px
+    @margin-side: 1.5em;
+    margin-left: @margin-side;
+    margin-right: @margin-side;
+    width: calc(100% - (2 * @margin-side));
+    padding: 1em;
+  }
+  
+  @media (max-width: 40em) { // 640px
+    @margin-side: 1em;
+    margin-left: @margin-side;
+    margin-right: @margin-side;
+    width: calc(100% - (2 * @margin-side));
+    padding: 0.75em;
+  }
+}
+
+// ============================================
+// EJEMPLO PARA COMPONENTES ANGULAR
+// ============================================
+
+:host {
+  // Asegurar tamaño de fuente base
+  font-size: 16px;
+  
+  @media (min-width: 80em) { // 1280px
+    font-size: 18px; // Incrementar ligeramente base en pantallas grandes
+  }
+}
+
+.app-container {
+  // Usar em relativo al font-size del host
+  margin-left: 2em;
+  margin-right: 2em;
+  width: calc(100% - 4em);
+  
+  // El padding también escala con el font-size
+  padding: 1.5em;
+  
+  // Responsive
+  @media (max-width: 48em) { // 768px
+    margin-left: 1em;
+    margin-right: 1em;
+    width: calc(100% - 2em);
+    padding: 1em;
+  }
+}
+
+// ============================================
+// UTILIDADES DE ESPACIADO EN EM
+// ============================================
+
+// Márgenes
+.m-1 { margin: 0.25em; }
+.m-2 { margin: 0.5em; }
+.m-3 { margin: 1em; }
+.m-4 { margin: 1.5em; }
+.m-5 { margin: 2em; }
+.m-6 { margin: 3em; }
+
+// Márgenes horizontales
+.mx-1 { margin-left: 0.25em; margin-right: 0.25em; }
+.mx-2 { margin-left: 0.5em; margin-right: 0.5em; }
+.mx-3 { margin-left: 1em; margin-right: 1em; }
+.mx-4 { margin-left: 1.5em; margin-right: 1.5em; }
+.mx-5 { margin-left: 2em; margin-right: 2em; }
+.mx-6 { margin-left: 3em; margin-right: 3em; }
+
+// Paddings
+.p-1 { padding: 0.25em; }
+.p-2 { padding: 0.5em; }
+.p-3 { padding: 1em; }
+.p-4 { padding: 1.5em; }
+.p-5 { padding: 2em; }
+.p-6 { padding: 3em; }
+
+// ============================================
+// EJEMPLO COMPLETO: CONTENEDOR FINAL
+// ============================================
+
+.container-final {
+  // Usar clamp para lo mejor de ambos mundos
+  --margin-min: 1em;    // 16px mínimo
+  --margin-ideal: 2%;   // 2% como valor ideal  
+  --margin-max: 3em;    // 48px máximo
+  
+  margin-left: clamp(var(--margin-min), var(--margin-ideal), var(--margin-max));
+  margin-right: clamp(var(--margin-min), var(--margin-ideal), var(--margin-max));
+  width: calc(100% - (2 * clamp(var(--margin-min), var(--margin-ideal), var(--margin-max))));
+  
+  // Padding también con clamp
+  padding: clamp(0.75em, 1.5%, 2em);
+  
+  // Estilos base
+  box-sizing: border-box;
+  display: block;
+  background: white;
+  border-radius: 0.5em;
+  box-shadow: 0 0.25em 0.75em rgba(0, 0, 0, 0.1);
+  
+  // Responsive adicional
+  @media (max-width: 48em) {
+    border-radius: 0.375em;
+    box-shadow: 0 0.125em 0.5em rgba(0, 0, 0, 0.08);
+  }
+  
+  @media (max-width: 30em) {
+    border-radius: 0.25em;
+    box-shadow: 0 0.0625em 0.25em rgba(0, 0, 0, 0.06);
+  }
+}
+
+

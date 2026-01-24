@@ -2,19 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, retry, shareReplay, tap, timeout } from 'rxjs/operators';
-
-export interface TextoResponse {
-  parrafo1: string;
-  parrafo2: string;
-}
-
-export interface TextoArrayResponse {
-  parrafos: string[];
-  total_parrafos: number;
-  total_caracteres: number;
-  idioma: string;
-}
-
+import { Estadisticas } from '../modulos/estadisticas.model';
+import { Errores } from '../modulos/errores.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,23 +13,30 @@ export class ServicioTexto {
 
 
   /**
-   * a.contar errores y relacionarlos a la tecla
-   * b.contar milisegundos entre tecla a-b
+   * x.contar errores y relacionarlos a la tecla
+   * a.contar milisegundos entre tecla a-b
+   * b.clasificar en velocidad bajo, medio , alto,super alto
    * 
    */
 
 
   private _carreraActual: string = "";
   private _carreraTerminada: boolean = false;
-  private siguientePosicion: number = 0;
-  private errores_tecleados: number = 0;
+  // private siguientePosicion: number = 0;
+
+
+  public estadisticas: Estadisticas;
+
+  constructor(
+    private http: HttpClient
+  ) {
+    this.estadisticas = new Estadisticas('', 0, 0, []);
+  }
 
 
   // Subject para notificar cuando se carga una nueva lección
   private leccionCargadaSubject = new BehaviorSubject<string>('');
   leccionCargada$ = this.leccionCargadaSubject.asObservable();
-
-
 
 
   // Subject para notificar cambios en la posición (cuando esTextoValido es llamado)
@@ -65,46 +61,66 @@ export class ServicioTexto {
   private carreraCache$: Observable<string> | null = null;
   private isLoading = false;
 
-  constructor(private http: HttpClient) { }
-
-
   public esCaracterValido(caracter: string): boolean {
-
     if (caracter == "") {
       return false;
     }
 
-    if (this.siguientePosicion == this._carreraActual.length) {
+    // if (this.siguientePosicion == this._carreraActual.length) {
+    if (this.estadisticas.posicionActual == this._carreraActual.length) {
       this._carreraTerminada = true;
       return true;
     }
 
-    if (this.siguientePosicion > this._carreraActual.length) {
+    // if (this.siguientePosicion > this._carreraActual.length) {
+    if (this.estadisticas.posicionActual > this._carreraActual.length) {
       return false;
     }
 
-    if (this._carreraActual[this.siguientePosicion] !== caracter) {
-      this.errores_tecleados++;
+    // if (this._carreraActual[this.siguientePosicion] !== caracter) {
+    if (this._carreraActual[this.estadisticas.posicionActual] !== caracter) {
+      this.estadisticas.totalErrores++;
+      this.setError(caracter);
       return false;
     }
 
-    this.siguientePosicion++;
+    // this.siguientePosicion++;
+    this.estadisticas.teclaActual= caracter;
+    this.estadisticas.posicionActual++;
 
     this.notificarCambioPosicion();
     return true;
   }
 
+  private setError(tecla: string): void {
+    const teclaNormalizada = tecla.trim();
+
+    if (!teclaNormalizada) {
+      console.warn("Tecla vacia recibida");
+      return;
+    }
+    const errorActual = new Errores(tecla, 1);
+
+    const existeError = this.estadisticas.errorPorTecla.find(ab => ab.tecla == tecla);
+    if (existeError) {
+      existeError.totalError++;
+    } else {
+      const nuevoError = new Errores(teclaNormalizada, 1);
+      this.estadisticas.errorPorTecla.push(errorActual);
+    }
+  }
+
 
   private notificarCambioPosicion(): void {
-    const caracterActual = this.siguientePosicion < this._carreraActual.length
-      ? this._carreraActual[this.siguientePosicion]
+    // const caracterActual = this.siguientePosicion < this._carreraActual.length
+    const caracterActual = this.estadisticas.posicionActual < this._carreraActual.length
+      ? this._carreraActual[this.estadisticas.posicionActual]
       : null;
-
     this.posicionCambiadaSubject.next({
-      posicion: this.siguientePosicion,
+      posicion: this.estadisticas.posicionActual,
       caracterActual: caracterActual,
       textoCompleto: this._carreraActual,
-      errores_tecleados: this.errores_tecleados,
+      errores_tecleados: this.estadisticas.totalErrores,
       terminado: this._carreraTerminada
     });
   }
@@ -122,7 +138,7 @@ export class ServicioTexto {
     for (let i = 0; i < this._carreraActual.length; i++) {
       const caracter = this._carreraActual[i];
 
-      if (i === this.siguientePosicion) {
+      if (i === this.estadisticas.posicionActual) {
         // Caracter actual (el que debe escribirse)
         resultado += `<span class="caracter-actual">${caracter}</span>`;
         // } else if (i < this.siguientePosicion) {
@@ -181,8 +197,10 @@ export class ServicioTexto {
   }
 
   get ContadorErrores(): number {
-    return this.errores_tecleados;
+    return this.estadisticas.totalErrores;
   }
+
+
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Error desconocido';

@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit ,ViewEncapsulation  } from '@angular/core';
-import { ServicioTexto, TextoResponse } from '../../services/servicio-texto';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ServicioTexto } from '../../services/servicio-texto';
+import { Observable, Subscription } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
@@ -14,8 +14,6 @@ export class Carrera implements OnInit, OnDestroy {
 
   private servicioCarrera: ServicioTexto;
   textoDesplegado: SafeHtml = '';
-
-
   private subscription: Subscription = new Subscription();
   private posicionCambiadaSubscription: Subscription | null = null;
 
@@ -29,8 +27,6 @@ export class Carrera implements OnInit, OnDestroy {
     );
   }
 
-
-
   ngOnDestroy(): void {
 
     // Limpiar suscripciones para evitar memory leaks
@@ -41,15 +37,14 @@ export class Carrera implements OnInit, OnDestroy {
       this.posicionCambiadaSubscription.unsubscribe();
     }
   }
-  ngOnInit(): void {
 
+  ngOnInit(): void {
     // Cargar la lección inicialmente
     this.cargarLeccion();
 
     // Suscribirse a cambios en la posición
     this.suscribirACambiosPosicion();
   }
-
 
   suscribirACambiosPosicion(): void {
     this.posicionCambiadaSubscription = this.servicioCarrera.posicionCambiada$.subscribe({
@@ -81,15 +76,10 @@ export class Carrera implements OnInit, OnDestroy {
     });
   }
 
-
-
   actualizarTextoConEstilos(): void {
     // Obtener el texto formateado con estilos del servicio
-
     // Obtener el texto formateado y sanitizarlo
     const textoHtml = this.servicioCarrera.obtenerTextoConEstilos();
-
-
     // Si el texto está vacío, mostrar mensaje
     if (!textoHtml || textoHtml.trim() === '') {
       this.textoDesplegado = this.sanitizer.bypassSecurityTrustHtml(
@@ -97,8 +87,6 @@ export class Carrera implements OnInit, OnDestroy {
       );
       return;
     }
-
     this.textoDesplegado = this.sanitizer.bypassSecurityTrustHtml(textoHtml);
   }
-
 }

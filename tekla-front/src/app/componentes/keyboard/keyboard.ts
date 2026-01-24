@@ -53,12 +53,11 @@ export class Keyboard implements OnInit {
   ngOnInit(): void {
     // Opción 1: Suscribirse directamente
     this._servicio.cargarLeccion().subscribe({
-      next: (texto) => {
-        // Aquí puedes hacer algo adicional si necesitas
+      next: (texto) => {         
       },
       error: (error) => {
         console.error('Error:', error);
-        // Cargar texto por defecto
+         
       }
     });
 

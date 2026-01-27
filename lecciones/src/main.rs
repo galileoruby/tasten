@@ -30,25 +30,23 @@ fn main() {
     }
 
     let local: DateTime<Local> = Local::now();
-    let _michi:Especie= Especie::Gato;
-    let _michi2:Especie= Especie::Hamster;
+    let _michi: Especie = Especie::Gato;
+    let _michi2: Especie = Especie::Hamster;
 
     let _kira = Mascota::new(
         String::from("enojona"),
         local,
         String::from("calico"),
         String::from("pollito asado"),
-        _michi
+        _michi,
     );
-
-
 
     let _naranjoso: Mascota = Mascota::new(
         String::from("el naranjas"),
         local,
         String::from("ginger"),
         String::from("aguacate"),
-        _michi2
+        _michi2,
     );
 
     let mut persona: Persona = Persona::nueva(String::from("Karen martinez"), 15);
@@ -60,7 +58,13 @@ fn main() {
 
     // let mascota: Mascota =-. Mascota::new(String::from("puto"), fecha);
     // println!("Hola  and secondos: {} ", segundos);
-    println!("{:#?}", persona);
+    println!("{:#?}", persona.mascotas);
+
+    persona.actualizar_comidafavorita_mascota(0, String::from("pollito-con-papas"));
+    println!("{:#?}", persona.mascotas);
+
+    let _myplaceholder: i32 = 34;
+    let myplaceholder: i32 = 34;
     // println!(
     //     "{}",
     //     _kira.fecha_nacimiento.format("%Y-%m-%d %H:%M").to_string()

@@ -5,7 +5,10 @@
 Cargo.lock
 
 
-
+tekla-front/dist/
+tekla-front/tmp/
+tekla-front/out-tsc/
+tekla-front/.angular/cache
 
 
 # --- Angular ---

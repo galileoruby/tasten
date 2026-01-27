@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
-import { RouterLink } from '@angular/router';
+
 import { Keyboard } from '../keyboard/keyboard';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem } from 'primeng/api';
@@ -9,7 +9,7 @@ import { Carrera } from '../carrera/carrera';
 @Component({
   selector: 'app-header',
   imports: [
-    RouterLink,
+    
     TabsModule,
     Keyboard,
     BreadcrumbModule,

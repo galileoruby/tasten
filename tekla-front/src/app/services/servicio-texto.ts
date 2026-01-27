@@ -4,6 +4,8 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, retry, shareReplay, tap, timeout } from 'rxjs/operators';
 import { Estadisticas } from '../modulos/estadisticas.model';
 import { Errores } from '../modulos/errores.model';
+import { date } from '@primeng/themes/aura/datepicker';
+import { mapToCanActivate } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -22,15 +24,56 @@ export class ServicioTexto {
 
   private _carreraActual: string = "";
   private _carreraTerminada: boolean = false;
-  // private siguientePosicion: number = 0;
-
-
   public estadisticas: Estadisticas;
 
   constructor(
     private http: HttpClient
   ) {
-    this.estadisticas = new Estadisticas('', 0, 0, []);
+    this.estadisticas = new Estadisticas('', 0, 0, [], 0, 0, null, null);
+  }
+
+
+  public iniciarCronometro(): void {
+    this.estadisticas.tiempoInicio = new Date();
+    this.estadisticas.tiempoFin = null;
+  }
+
+  public detenerCronometro(): void {
+    this.estadisticas.tiempoFin = new Date();
+  }
+
+  private getTiempoTranscurridoSegundos(): number {
+    if (!this.estadisticas.tiempoInicio) return 0;
+
+    const fin = this.estadisticas.tiempoFin || new Date();
+    const diferenciaMs = fin.getTime() - this.estadisticas.tiempoInicio.getTime();
+    return diferenciaMs / 1000;
+  }
+
+  public calcularPPM(): number {
+    const segundos = this.getTiempoTranscurridoSegundos();
+    const minutos = segundos / 60;
+    if (minutos <= 0) return 0;
+    const palabras = this.estadisticas.caracteresCorrectos / 5;
+    return Math.round((palabras / minutos) * 100) / 100
+
+  }
+
+  private calcularPPMNet(): number {
+    const segundos = this.getTiempoTranscurridoSegundos();
+    const minutos = segundos / 60;
+    if (minutos <= 0) return 0;
+
+    const palabras = this.estadisticas.caracteresCorrectos / 5;
+    const ppmNet = (palabras - this.estadisticas.totalErrores) / minutos;
+    return ppmNet > 0 ? Math.round(ppmNet * 100) / 100 : 0;
+  }
+
+  public calcularPrecision(): number {    
+    const precision = (this.estadisticas.caracteresCorrectos / this.estadisticas.totalCaracteresLeccion) * 100;
+    console.log(`caracteresCorrectos: ${this.estadisticas.caracteresCorrectos}, totalCaracteresLeccion:${this.estadisticas.totalCaracteresLeccion}, precision: ${precision}`)
+    if(precision<0) return 0;
+    return Math.round(precision * 100) / 100;
   }
 
 
@@ -61,45 +104,44 @@ export class ServicioTexto {
   private carreraCache$: Observable<string> | null = null;
   private isLoading = false;
 
-  public esCaracterValido(caracter: string): boolean {
+  public registrarCaracter(caracter: string): boolean {
     if (caracter == "") {
       return false;
     }
 
-    // if (this.siguientePosicion == this._carreraActual.length) {
-    if (this.estadisticas.posicionActual == this._carreraActual.length) {
+    if (this.estadisticas.posicionActual == this.estadisticas.totalCaracteresLeccion-1) {
+      this.detenerCronometro();
       this._carreraTerminada = true;
       return true;
     }
 
-    // if (this.siguientePosicion > this._carreraActual.length) {
-    if (this.estadisticas.posicionActual > this._carreraActual.length) {
+    if (this.estadisticas.posicionActual > this.estadisticas.totalCaracteresLeccion) {
       return false;
     }
 
-    // if (this._carreraActual[this.siguientePosicion] !== caracter) {
-    if (this._carreraActual[this.estadisticas.posicionActual] !== caracter) {
-      this.estadisticas.totalErrores++;
-      this.setError(caracter);
+    if (this._carreraActual[this.estadisticas.posicionActual] !== caracter) {      
+      this.registrarErrorPorTecla(caracter);
       return false;
     }
 
-    // this.siguientePosicion++;
-    this.estadisticas.teclaActual= caracter;
+    this.estadisticas.teclaActual = caracter;
     this.estadisticas.posicionActual++;
-
+    this.estadisticas.caracteresCorrectos++;
+    
     this.notificarCambioPosicion();
     return true;
   }
-
-  private setError(tecla: string): void {
+  
+  private registrarErrorPorTecla(tecla: string): void {
     const teclaNormalizada = tecla.trim();
-
+    
     if (!teclaNormalizada) {
       console.warn("Tecla vacia recibida");
       return;
     }
     const errorActual = new Errores(tecla, 1);
+    this.estadisticas.caracteresCorrectos--;
+    this.estadisticas.totalErrores++;
 
     const existeError = this.estadisticas.errorPorTecla.find(ab => ab.tecla == tecla);
     if (existeError) {
@@ -111,8 +153,7 @@ export class ServicioTexto {
   }
 
 
-  private notificarCambioPosicion(): void {
-    // const caracterActual = this.siguientePosicion < this._carreraActual.length
+  private notificarCambioPosicion(): void {    
     const caracterActual = this.estadisticas.posicionActual < this._carreraActual.length
       ? this._carreraActual[this.estadisticas.posicionActual]
       : null;
@@ -175,6 +216,7 @@ export class ServicioTexto {
       timeout(5000),
       tap(texto => {
         this._carreraActual = texto;
+        this.estadisticas.totalCaracteresLeccion = texto.length;
         this.leccionCargadaSubject.next(texto);
         this.isLoading = false;
         this.notificarCambioPosicion();

@@ -11,6 +11,7 @@ pub struct Mascota {
     pub color: String,
     pub comida_favorita: String,
     pub especie: Especie,
+     modificado: bool
 }
 
 impl Mascota {
@@ -19,18 +20,24 @@ impl Mascota {
         fecha: DateTime<Local>,
         color: String,
         comida_favorita: String,
-        especie: Especie
+        especie: Especie,
     ) -> Self {
         Self {
             nombre,
             fecha_nacimiento: fecha,
             color,
             comida_favorita: comida_favorita,
-            especie
+            especie,
+            modificado: false
         }
     }
 
     pub fn tarjeta(&self) {
         println!("Hola soy {}", self.nombre);
+    }
+
+    pub fn actualizar_comida_favorita(&mut self, nueva_comida: String) {
+        self.comida_favorita = nueva_comida;
+        self.modificado = true;
     }
 }

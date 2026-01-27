@@ -2,17 +2,19 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ServicioTexto } from '../../services/servicio-texto';
 import { Observable, Subscription } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { FluidModule } from 'primeng/fluid';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-carrera',
-  imports: [],
+  imports: [FluidModule, TooltipModule],
   templateUrl: './carrera.html',
   styleUrl: './carrera.less',
   encapsulation: ViewEncapsulation.None
 })
 export class Carrera implements OnInit, OnDestroy {
 
-  private servicioCarrera: ServicioTexto;
+  public servicioCarrera: ServicioTexto;
   textoDesplegado: SafeHtml = '';
   private subscription: Subscription = new Subscription();
   private posicionCambiadaSubscription: Subscription | null = null;
@@ -44,6 +46,23 @@ export class Carrera implements OnInit, OnDestroy {
 
     // Suscribirse a cambios en la posición
     this.suscribirACambiosPosicion();
+  }
+
+  getStatsTooltip(): string {
+
+    const erroresPorTecla = this.servicioCarrera.estadisticas.errorPorTecla
+      .map(error => `${error.tecla}: ${error.totalError} errores`)
+      .join('\n      ');
+
+    return `
+      📊 Estadísticas en tiempo real:      
+      • Precisión: ${this.servicioCarrera.calcularPrecision()}%
+      • Errores: ${this.servicioCarrera.ContadorErrores}
+      • Caracteres: ${this.servicioCarrera.estadisticas.totalCaracteresLeccion}
+      • Progreso: ${((this.servicioCarrera.estadisticas.posicionActual / this.servicioCarrera.estadisticas.totalCaracteresLeccion) * 100).toFixed(1)}%             
+      📈 Errores por tecla:
+          ${erroresPorTecla ? '      ' + erroresPorTecla : '      Ningún error registrado'}
+    `.trim();
   }
 
   suscribirACambiosPosicion(): void {

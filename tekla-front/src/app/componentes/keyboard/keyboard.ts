@@ -15,7 +15,7 @@ import { ServicioTexto } from '../../services/servicio-texto';
 })
 export class Keyboard implements OnInit {
 
-  _servicio: ServicioTexto;
+  servicioCarrera: ServicioTexto;
   value = "";
   lastKeyPressed = '';
   esValido: boolean | null = null;
@@ -25,6 +25,8 @@ export class Keyboard implements OnInit {
   enterCount = 0;
   escapeCount = 0;
   tabCount = 0;
+
+  private iniciarPrueba: boolean = false;
 
 
   // Historial de tiempos entre teclas
@@ -42,7 +44,7 @@ export class Keyboard implements OnInit {
 
 
   constructor(servicioTexto: ServicioTexto) {
-    this._servicio = servicioTexto;
+    this.servicioCarrera = servicioTexto;
     afterNextRender(() => {
       // Este código solo corre en el navegador después del primer renderizado
       this.inputRef()?.nativeElement.focus();
@@ -52,12 +54,12 @@ export class Keyboard implements OnInit {
 
   ngOnInit(): void {
     // Opción 1: Suscribirse directamente
-    this._servicio.cargarLeccion().subscribe({
-      next: (texto) => {         
+    this.servicioCarrera.cargarLeccion().subscribe({
+      next: (texto) => {
       },
       error: (error) => {
         console.error('Error:', error);
-         
+
       }
     });
 
@@ -67,7 +69,7 @@ export class Keyboard implements OnInit {
 
   async cargarLeccionAsync(): Promise<void> {
     try {
-      const texto = this._servicio.cargarLeccion();
+      const texto = this.servicioCarrera.cargarLeccion();
     } catch (error) {
       console.error('Error async:', error);
     }
@@ -82,6 +84,12 @@ export class Keyboard implements OnInit {
     //   shiftKey: event.shiftKey,
     //   altKey: event.altKey
     // });
+
+    if (!this.iniciarPrueba) {
+      this.iniciarPrueba = true;
+      this.servicioCarrera.iniciarCronometro();
+
+    }
 
     const ahora = performance.now();
 
@@ -115,7 +123,7 @@ export class Keyboard implements OnInit {
     }
 
 
-    this.esValido = this._servicio.esCaracterValido(event.key);
+    this.esValido = this.servicioCarrera.registrarCaracter(event.key);
 
 
     if (this._ultimoTimeStamp > 0) {
@@ -153,6 +161,8 @@ export class Keyboard implements OnInit {
     if (this.keyHistory.length > 10) {
       this.keyHistory.shift();
     }
+
+  
   }
 
 

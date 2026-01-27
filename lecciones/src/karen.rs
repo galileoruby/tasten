@@ -5,8 +5,7 @@ use crate::michi::Mascota;
 pub struct Persona {
     pub nombre: String,
     pub edad: u32,
-    pub mascotas: Vec<Mascota>
-    
+    pub mascotas: Vec<Mascota>,
 }
 
 impl Persona {
@@ -28,5 +27,13 @@ impl Persona {
 
     pub fn cantidad_mascotas(&self) -> usize {
         self.mascotas.len()
+    }
+
+    pub fn actualizar_comidafavorita_mascota(&mut self, indice: usize, nueva_comida: String) {
+        if let Some(mascota) = self.mascotas.get_mut(indice) {
+            mascota.actualizar_comida_favorita(nueva_comida);
+        }else{
+            println!("No hay registros para actualizar.")
+        }
     }
 }

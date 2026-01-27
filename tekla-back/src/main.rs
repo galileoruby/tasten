@@ -18,6 +18,7 @@ struct AppState {
     b.generar textos aleatorios en cada solicitud
     c.almacenar en alguna nosql
     d.almacenar estadisticas recuperadas.
+    e.emitir websockets
 */
 
  

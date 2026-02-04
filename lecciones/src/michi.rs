@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-// use serde::{Deserialize, Serialize};
 use chrono::prelude::*;
 
 use crate::especie::Especie;

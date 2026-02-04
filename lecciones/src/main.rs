@@ -1,73 +1,44 @@
 #![allow(unused_imports, dead_code)]
 mod karen;
 mod michi;
+mod paquetelibros;
+
+mod metodos_o;
+
+mod vectores;
 
 mod especie;
-
+mod llamada_karen;
+use console::{Term, style};
 use std::arch::x86_64::_SIDD_MOST_SIGNIFICANT;
+use std::io::{self, Read};
 use std::ops::Add;
 
-use crate::especie::Especie;
-use crate::karen::Persona;
-use crate::michi::Mascota;
-use chrono::{TimeZone, Utc};
-
-use chrono::prelude::*;
+use paquetelibros::main_1;
+use vectores::dinamicos;
 
 fn main() {
-    let fecha = Utc.with_ymd_and_hms(2025, 02, 8, 13, 12, 50);
+    loop {
+        println!("{}", style("Pruebas en rustaceo").cyan().bold());
+        println!("{}", style("1. Leer archivo").green());
+        println!("{}", style("2. Generar numeros aleatorios").green()) ;
+        println!("{}", style("S. Salir").red() );
+        print!("{}", style("Seleccione una opción:").yellow());
+        println!();
 
-    match fecha {
-        chrono::LocalResult::Single(x_men) => {
-            println!("Fecha valida:{}", x_men);
-        }
-        chrono::LocalResult::Ambiguous(dt1, dt2) => {
-            println!("Fecha ambigua:{} o {}", dt1, dt2);
-        }
-        chrono::offset::LocalResult::None => {
-            println!("Fecha perramente invalida");
+        let mut opcion = String::new();
+        io::stdin().read_line(&mut opcion).unwrap();
+
+        print!("Opcion seleccionada::{}.-", opcion);
+
+        match opcion.trim() {
+            "1" => _ = paquetelibros::Libro::leer_archivo(),
+            "2" => _ = metodos_o::burbuja::orden_burbuja(),
+            op if matches!(op, "S" | "s") => {
+                println!("Adios");
+                break;
+            }
+            _ => println!("Opcion no valida"),
         }
     }
-
-    let local: DateTime<Local> = Local::now();
-    let _michi: Especie = Especie::Gato;
-    let _michi2: Especie = Especie::Hamster;
-
-    let _kira = Mascota::new(
-        String::from("enojona"),
-        local,
-        String::from("calico"),
-        String::from("pollito asado"),
-        _michi,
-    );
-
-    let _naranjoso: Mascota = Mascota::new(
-        String::from("el naranjas"),
-        local,
-        String::from("ginger"),
-        String::from("aguacate"),
-        _michi2,
-    );
-
-    let mut persona: Persona = Persona::nueva(String::from("Karen martinez"), 15);
-
-    persona.agregar_mascota(_kira);
-    persona.agregar_mascota(_naranjoso);
-
-    // let segundos=local.nanosecond();
-
-    // let mascota: Mascota =-. Mascota::new(String::from("puto"), fecha);
-    // println!("Hola  and secondos: {} ", segundos);
-    println!("{:#?}", persona.mascotas);
-
-    persona.actualizar_comidafavorita_mascota(0, String::from("pollito-con-papas"));
-    println!("{:#?}", persona.mascotas);
-
-    let _myplaceholder: i32 = 34;
-    let myplaceholder: i32 = 34;
-    // println!(
-    //     "{}",
-    //     _kira.fecha_nacimiento.format("%Y-%m-%d %H:%M").to_string()
-    // );
-    // println!("{}", _kira.fecha_nacimiento.format("%m -%d").to_string());
 }

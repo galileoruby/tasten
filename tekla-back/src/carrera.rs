@@ -1,6 +1,6 @@
 use rand::Rng;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct Carrera {
     pub texto_generado: String,
 }

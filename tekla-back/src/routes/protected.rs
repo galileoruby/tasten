@@ -11,6 +11,23 @@ async fn health() -> Json<Value> {
     }))
 }
 
+/*
+sugar syntax
+async fn random(AuthUser(_claims):AuthUser) -> Json<Value> {
+    let carrera = Carrera::leccion_aleatoria();
+    Json(json!({
+       "leccion": carrera
+    }))
+}
+*/
+
+fn random() -> impl std::future::Future<Output = Json<Value>> {
+    async {
+        let carrera = Carrera::leccion_aleatoria();
+        Json(json!({"leccion": carrera}))
+    }
+}
+
 /// GET /api/me — ruta protegida, cualquier usuario autenticado
 async fn me(AuthUser(claims): AuthUser) -> Json<Value> {
     Json(json!({
@@ -51,4 +68,5 @@ pub fn router() -> Router {
         .route("/api/me",        get(me))          // 🔒 cualquier token válido
         .route("/api/admin",     get(admin_only))  // 🔒 solo admin
         .route("/api/dashboard", get(dashboard))   // 🔒 admin o user
+        .route("/api/random", get(random)) //inicio de carrera
 }

@@ -2,6 +2,7 @@ mod errors;
 mod middleware;
 mod models;
 mod routes;
+mod services;
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};

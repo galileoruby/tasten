@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 
 /// Representa un usuario en el sistema
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct User {
-    pub id: u32,
-    pub username: String,
-    pub password_hash: String, // En producción: usar bcrypt/argon2
-    pub role: String,
-}
+    pub struct User {
+        pub id: u32,
+        pub username: String,
+        pub password_hash: String, // En producción: usar bcrypt/argon2
+        pub role: String,
+    }
 
 /// Payload que el cliente envía para hacer login
 #[derive(Debug, Deserialize)]

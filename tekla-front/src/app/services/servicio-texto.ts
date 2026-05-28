@@ -6,12 +6,13 @@ import { Estadisticas } from '../modulos/estadisticas.model';
 import { Errores } from '../modulos/errores.model';
 import { date } from '@primeng/themes/aura/datepicker';
 import { mapToCanActivate } from '@angular/router';
+import { LeccionRequest } from '../modulos/leccion.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ServicioTexto {
-  private readonly API_URL = 'http://127.0.0.1:8080'; // URL de tu API Rust
+  private readonly API_URL = 'http://localhost:3000'; // URL de tu API Rust
 
 
   /**
@@ -23,6 +24,9 @@ export class ServicioTexto {
 
 
   private _carreraActual: string = "";
+
+  // Agrega esta variable junto a _carreraActual
+  private _leccionActual: LeccionRequest | null = null;
   private _carreraTerminada: boolean = false;
   public estadisticas: Estadisticas;
 
@@ -69,10 +73,10 @@ export class ServicioTexto {
     return ppmNet > 0 ? Math.round(ppmNet * 100) / 100 : 0;
   }
 
-  public calcularPrecision(): number {    
+  public calcularPrecision(): number {
     const precision = (this.estadisticas.caracteresCorrectos / this.estadisticas.totalCaracteresLeccion) * 100;
     console.log(`caracteresCorrectos: ${this.estadisticas.caracteresCorrectos}, totalCaracteresLeccion:${this.estadisticas.totalCaracteresLeccion}, precision: ${precision}`)
-    if(precision<0) return 0;
+    if (precision < 0) return 0;
     return Math.round(precision * 100) / 100;
   }
 
@@ -101,7 +105,7 @@ export class ServicioTexto {
 
 
   // Subject para cachear la respuesta de la API
-  private carreraCache$: Observable<string> | null = null;
+  private carreraCache$: Observable<LeccionRequest> | null = null;
   private isLoading = false;
 
   public registrarCaracter(caracter: string): boolean {
@@ -109,17 +113,17 @@ export class ServicioTexto {
       return false;
     }
 
-    if (this.estadisticas.posicionActual == this.estadisticas.totalCaracteresLeccion-1) {
+    if (this.estadisticas.posicionActual == this.estadisticas.totalCaracteresLeccion - 1) {
       this.detenerCronometro();
       this._carreraTerminada = true;
       return true;
     }
 
-    if (this.estadisticas.posicionActual > this.estadisticas.totalCaracteresLeccion) {
+    if (this.estadisticas.posicionActual > this._leccionActual?.caracteres!) {
       return false;
     }
 
-    if (this._carreraActual[this.estadisticas.posicionActual] !== caracter) {      
+    if (this._carreraActual[this.estadisticas.posicionActual] !== caracter) {
       this.registrarErrorPorTecla(caracter);
       return false;
     }
@@ -127,14 +131,14 @@ export class ServicioTexto {
     this.estadisticas.teclaActual = caracter;
     this.estadisticas.posicionActual++;
     this.estadisticas.caracteresCorrectos++;
-    
+
     this.notificarCambioPosicion();
     return true;
   }
-  
+
   private registrarErrorPorTecla(tecla: string): void {
     const teclaNormalizada = tecla.trim();
-    
+
     if (!teclaNormalizada) {
       console.warn("Tecla vacia recibida");
       return;
@@ -153,7 +157,7 @@ export class ServicioTexto {
   }
 
 
-  private notificarCambioPosicion(): void {    
+  private notificarCambioPosicion(): void {
     const caracterActual = this.estadisticas.posicionActual < this._carreraActual.length
       ? this._carreraActual[this.estadisticas.posicionActual]
       : null;
@@ -200,10 +204,10 @@ export class ServicioTexto {
 
 
 
-  cargarLeccion(): Observable<string> {
+  cargarLeccion(): Observable<LeccionRequest> {
 
-    if (this._carreraActual && this._carreraActual !== '') {
-      return of(this._carreraActual);
+    if (this._leccionActual) {
+      return of(this._leccionActual);
     }
 
     if (this.carreraCache$) {
@@ -211,13 +215,16 @@ export class ServicioTexto {
     }
 
     // Si no hay caché, hacemos la petición
-    this.carreraCache$ = this.http.get<string>(`${this.API_URL}/texto`).pipe(
+    this.isLoading = true;
+
+    this.carreraCache$ = this.http.get<LeccionRequest>(`${this.API_URL}/api/leccion`).pipe(
       retry(2),
       timeout(5000),
-      tap(texto => {
-        this._carreraActual = texto;
-        this.estadisticas.totalCaracteresLeccion = texto.length;
-        this.leccionCargadaSubject.next(texto);
+      tap(leccion => {
+        this._carreraActual = leccion.texto as string;
+        this.estadisticas.totalCaracteresLeccion = leccion.caracteres;
+        
+        this.leccionCargadaSubject.next(leccion.texto as string);
         this.isLoading = false;
         this.notificarCambioPosicion();
       }),
@@ -226,7 +233,7 @@ export class ServicioTexto {
         this.isLoading = false;
         return this.handleError(error);
       }),
-      shareReplay(1) // Comparte la respuesta con todos los suscriptores
+      shareReplay(1)
     );
 
     this.isLoading = true;

@@ -4,14 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Framework principal
-axum = { version = "0.7", features = ["macros"] }
+# Framework principal — agregamos "ws" para WebSockets
+axum = { version = "0.7", features = ["macros", "ws"] }
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.5", features = ["cors", "trace"] }
 
-#rand
-rand  ="0.9.2"
+# Mapa concurrente para salas (thread-safe HashMap)
+dashmap = "6"
+
+# rand
+rand = "0.9.2"
 
 # JWT
 jsonwebtoken = "9"
@@ -30,6 +33,12 @@ dotenvy = "0.15"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# Tiempo (para expiración del token)
+# Tiempo
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1.0.102"
+
+# UUID para identificar jugadores y salas
+uuid = { version = "1", features = ["v4"] }
+
+
+futures-util = "0.3"

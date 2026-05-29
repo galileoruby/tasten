@@ -6,9 +6,11 @@ use chrono::Utc;
 pub struct EstadisticasService;
 
 impl EstadisticasService {
-    /// Crear una nueva instancia de estadísticas
-    pub fn crear(tecla_actual: String, total_caracteres_leccion: u16) -> Estadisticas {
+    /*
+    /// Crear una nueva instancia de estadísticas    
+    pub fn crear(tecla_actual: String, total_caracteres_leccion: u16, id_leccion: u16) -> Estadisticas {
         Estadisticas {
+            id_leccion,
             tecla_actual,
             posicion_actual: 0,
             total_errores: 0,
@@ -19,6 +21,7 @@ impl EstadisticasService {
             tiempo_fin: None,
         }
     }
+    */
 
     pub fn calcular_precision(estadisticas: &Estadisticas) -> f64 {
         if estadisticas.total_caracteres_leccion == 0 {
@@ -60,7 +63,18 @@ impl EstadisticasService {
     /// Registrar resultados finales de una lección
     /// Recibe el objeto Estadísticas y retorna un JSON con estado, mensaje y datos
     pub fn registrar_resultados(estadisticas: &Estadisticas) -> Value {
+
+
+
         // Validar que la lección esté finalizada
+        if estadisticas.id_leccion.is_none() {
+            return json!({
+                "estado": "error",
+                "mensaje": "Identificacion de leccion ausente",
+                "exitoso": false,
+                "datos": null
+            });
+        }
         if estadisticas.tiempo_fin.is_none() {
             return json!({
                 "estado": "error",

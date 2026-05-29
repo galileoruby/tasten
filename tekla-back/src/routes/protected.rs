@@ -5,6 +5,7 @@ use crate::{
     errors::AppError,
     middleware::auth::{AuthUser, RequireRole},
     routes::carrera::router_leccion,
+    routes::estadisticas::router_estadisticas,
 };
 
 /// GET /api/health — ruta pública, sin autenticación
@@ -44,7 +45,7 @@ async fn dashboard(AuthUser(claims): AuthUser) -> Json<Value> {
 
     Json(json!({
         "content": content,
-        "user":    claims.sub,
+        "user": claims.sub,
     }))
 }
 
@@ -57,4 +58,5 @@ pub fn router() -> Router {
         .route("/apils/dashboard", get(dashboard)) // 🔒 admin o user
         // .route("/api/leccion", get(random)) //inicio de carrera
         .merge(router_leccion())
+        .merge(router_estadisticas())
 }

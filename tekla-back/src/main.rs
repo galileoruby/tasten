@@ -3,18 +3,19 @@ mod middleware;
 mod models;
 mod routes;
 mod services;
+mod state; // <-- nuevo
 
 use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use state::AppState;
+
 #[tokio::main]
 async fn main() {
-    // Cargar variables de entorno (.env)
     dotenvy::dotenv().ok();
 
-    // Inicializar logging
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             std::env::var("RUST_LOG").unwrap_or_else(|_| "backend=debug".into()),
@@ -22,15 +23,22 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Configurar CORS (ajustar origins en producción)
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
         .allow_headers(Any);
 
+    let app_state = AppState::new();
+
+    // Router WS con su propio estado
+    let ws_router = Router::new()
+        .route("/ws/:room_id", axum::routing::get(routes::ws::ws_handler))
+        .with_state(app_state);
+
     let app = Router::new()
         .merge(routes::auth::router())
         .merge(routes::protected::router())
+        .merge(ws_router)
         .layer(cors)
         .layer(TraceLayer::new_for_http());
 

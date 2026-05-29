@@ -14,6 +14,7 @@ pub struct Errores {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Estadisticas {
+    pub id_leccion: Option<u16>,
     pub tecla_actual: String,
     pub posicion_actual: u16,
     pub total_errores: u16,

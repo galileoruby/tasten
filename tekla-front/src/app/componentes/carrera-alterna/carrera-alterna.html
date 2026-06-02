@@ -1,0 +1,62 @@
+<!-- Texto de la carrera -->
+<p-card header="Carrera de Teclado">
+
+  <!-- Texto a escribir -->
+  <div class="texto-carrera mb-4 p-3 border-round surface-100">
+    @for (char of textoCarrera().split(''); track $index) {
+      <span [class]="getClaseCaracter($index)">{{ char }}</span>
+    }
+  </div>
+
+  <!-- Input del jugador -->
+  <input
+    pInputText
+    class="w-full mb-3"
+    placeholder="Empieza a escribir..."
+    [value]="inputUsuario()"
+    (keyup)="onTecla($event)"
+    [disabled]="!textoCarrera()"
+  />
+
+  <!-- Progreso local -->
+  <p-progressBar [value]="porcentajeProgreso()" class="mb-2" />
+  <small>{{ posicionLocal() }} / {{ totalCaracteres() }} caracteres</small>
+
+</p-card>
+
+<!-- Tabla de jugadores en tiempo real -->
+<p-card header="Jugadores" class="mt-4">
+  <p-table [value]="jugadoresOrdenados()">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Usuario</th>
+        <th>Progreso</th>
+        <th>WPM</th>
+        <th>Precisión</th>
+        <th>Errores</th>
+        <th>Estado</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-j>
+      <tr>
+        <td>{{ j.usuario }}</td>
+        <td>
+          <p-progressBar
+            [value]="totalCaracteres() > 0 ? (j.posicion / totalCaracteres()) * 100 : 0"
+            [style]="{ height: '8px' }"
+          />
+        </td>
+        <td>{{ j.wpm | number:'1.0-0' }}</td>
+        <td>{{ j.precision | number:'1.0-1' }}%</td>
+        <td>{{ j.errores }}</td>
+        <td>
+          @if (j.terminado) {
+            <p-tag severity="success" value="Terminó en {{ j.tiempo_segundos }}s" />
+          } @else {
+            <p-tag severity="info" value="Escribiendo..." />
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>

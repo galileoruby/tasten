@@ -1,10 +1,10 @@
 use axum::{routing::post, Json, Router};
-use serde_json::{json, Value};
+use serde_json::{ Value};
 
 use crate::{
-    models::carrera::LeccionResponse, 
+    
     models::estadisticas::Estadisticas,
-    services::carrera::obtener_leccion_aleatoria, 
+    
     services::estadisticas::EstadisticasService,
 };
 

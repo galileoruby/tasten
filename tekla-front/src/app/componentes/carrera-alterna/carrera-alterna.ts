@@ -14,6 +14,7 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { ServicioTexto } from '../../services/servicio-texto';
+import { Estadisticas} from '../../componentes/estadisticas/estadisticas';
 
 interface EstadoJugador {
   usuario: string;
@@ -36,6 +37,7 @@ interface EstadoJugador {
     ProgressBarModule,
     TableModule,
     TagModule,
+    Estadisticas
   ],
   templateUrl: './carrera-alterna.html',
   styleUrl: './carrera-alterna.less',

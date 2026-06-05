@@ -1,0 +1,83 @@
+<!-- Dialog Modal para Estadísticas -->
+  <p-dialog
+    [visible]="true"
+    [modal]="false"
+    [header]="'📊 Estadísticas en Tiempo Real'"
+    [style]="{ width: '100%', maxWidth: '500px' }"
+    [position]="'right'"
+    [draggable]="true"
+    [dismissableMask]="false"
+  [blockScroll]="false"
+    [closeOnEscape]="true"
+    (onHide)="cerrarEstadisticas()"
+    styleClass="stats-dialog">
+
+    <div class="stats-content">
+      <!-- Tarjetas de estadísticas principales -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon">🎯</span>
+          <span class="stat-label">Precisión</span>
+          <span class="stat-value">{{ getEstadisticas().precision }}%</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">⚠️</span>
+          <span class="stat-label">Errores</span>
+          <span class="stat-value">{{ getEstadisticas().errores }}</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">📝</span>
+          <span class="stat-label">Caracteres</span>
+          <span class="stat-value">{{ getEstadisticas().totalCaracteres }}</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">⚡</span>
+          <span class="stat-label">Progreso</span>
+          <span class="stat-value">{{ getEstadisticas().progreso }}%</span>
+        </div>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="progress-section">
+        <div class="progress-label">
+          <span>Avance: {{ getEstadisticas().posicionActual }} / {{ getEstadisticas().totalCaracteres }}</span>
+        </div>
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            [style.width.%]="getEstadisticas().progreso">
+          </div>
+        </div>
+      </div>
+
+      <!-- Errores por tecla -->
+      <div class="errors-section" *ngIf="getEstadisticas().erroresPorTecla.length > 0">
+        <h3 class="section-title">📈 Errores por Tecla</h3>
+        <div class="errors-list">
+          <div class="error-item" *ngFor="let error of getEstadisticas().erroresPorTecla">
+            <span class="error-key">{{ error.tecla }}</span>
+            <span class="error-count">{{ error.totalError }} error{{ error.totalError !== 1 ? 'es' : '' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="no-errors" *ngIf="getEstadisticas().erroresPorTecla.length === 0">
+        ✨ ¡Ningún error registrado! Vas perfecto.
+      </div>
+    </div>
+
+    <!-- Footer del dialog -->
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        type="button"
+        label="Cerrar"
+        icon="pi pi-times"
+        (click)="cerrarEstadisticas()"
+        [text]="true">
+      </button>
+    </ng-template>
+  </p-dialog>

@@ -113,6 +113,11 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
                                 100.0
                             };
 
+                            info!(
+                            "[PROGRESO] usuario={}, pos={}, err={}, correctos={}, elapsed_s={:.2}, wpm={:.2}, precision={:.2}",
+                            usuario_clone, posicion, errores, caracteres_correctos, elapsed_s, wpm, precision
+                            );
+
                             let evento = EventoSala::Progreso {
                                 usuario: usuario_clone.clone(),
                                 posicion,

@@ -1,12 +1,11 @@
 import { Component, ViewEncapsulation, inject, effect } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FluidModule } from 'primeng/fluid';
-import { TooltipModule } from 'primeng/tooltip';
 import { CarreraStateService } from '../../services/carrera-state.service';
 
 @Component({
   selector: 'app-carrera',
-  imports: [FluidModule, TooltipModule],
+  imports: [FluidModule],
   templateUrl: './carrera.html',
   styleUrl: './carrera.less',
   encapsulation: ViewEncapsulation.None,
@@ -23,27 +22,6 @@ export class Carrera {
     effect(() => {
       this.actualizarTextoConEstilos();
     });
-  }
-
-  getStatsTooltip(): string {
-    const erroresPorTecla = this.cs.errorPorTecla()
-      .map(error => `${error.tecla}: ${error.cantidad} errores`)
-      .join('\n      ');
-
-    const total = this.cs.totalCaracteres();
-    const progreso = total > 0
-      ? ((this.cs.posicionLocal() / total) * 100)
-      : 0;
-
-    return `
-      📊 Estadísticas en tiempo real:
-      • Precisión: ${this.cs.precisionLocal()}%
-      • Errores: ${this.cs.erroresLocales()}
-      • Caracteres: ${total}
-      • Progreso: ${progreso.toFixed(1)}%
-      📈 Errores por tecla:
-          ${erroresPorTecla || 'Ningún error registrado'}
-    `.trim();
   }
 
   actualizarTextoConEstilos(): void {

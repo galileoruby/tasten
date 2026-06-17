@@ -5,6 +5,7 @@ import { Keyboard } from '../keyboard/keyboard';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem } from 'primeng/api';
 import { Carrera } from '../carrera/carrera'; 
+import {CarreraAlterna} from '../carrera-alterna/carrera-alterna';
 
 @Component({
   selector: 'app-header',
@@ -13,7 +14,9 @@ import { Carrera } from '../carrera/carrera';
     TabsModule,
     Keyboard,
     BreadcrumbModule,
-    Carrera],
+    Carrera,
+    CarreraAlterna
+  ],
   templateUrl: './header.html',
   styleUrl: './header.less',
 })

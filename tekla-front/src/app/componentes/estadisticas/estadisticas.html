@@ -1,83 +1,88 @@
-<!-- Dialog Modal para Estadísticas -->
-  <p-dialog
-    [visible]="true"
-    [modal]="false"
-    [header]="'📊 Estadísticas en Tiempo Real'"
-    [style]="{ width: '100%', maxWidth: '500px' }"
-    [position]="'right'"
-    [draggable]="true"
-    [dismissableMask]="false"
-  [blockScroll]="false"
-    [closeOnEscape]="true"
-    (onHide)="cerrarEstadisticas()"
-    styleClass="stats-dialog">
+<p-card styleClass="stats-card">
 
-    <div class="stats-content">
-      <!-- Tarjetas de estadísticas principales -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-icon">🎯</span>
-          <span class="stat-label">Precisión</span>
-          <span class="stat-value">{{ getEstadisticas().precision }}%</span>
-        </div>
+  <ng-template #header>
+    <div class="stats-header">
+      <span class="stats-title">Live Stats</span>
+    </div>
+    <span class="stats-subtitle">Current Session</span>
+  </ng-template>
 
-        <div class="stat-card">
-          <span class="stat-icon">⚠️</span>
-          <span class="stat-label">Errores</span>
-          <span class="stat-value">{{ getEstadisticas().errores }}</span>
-        </div>
+  <!-- Precisión -->
+  <div class="stat-row stat-row--knob">
+    <div class="stat-info">
+      <span class="stat-icon">🎯</span>
+      <span class="stat-label">PRECISION</span>
+    </div>
+    <strong>{{ cs.precisionLocal() }}%</strong>
+  </div>
+  <p-divider />
 
-        <div class="stat-card">
-          <span class="stat-icon">📝</span>
-          <span class="stat-label">Caracteres</span>
-          <span class="stat-value">{{ getEstadisticas().totalCaracteres }}</span>
-        </div>
+  <!-- WPM -->
+  <div class="stat-row">
+    <span class="stat-icon">⚡</span>
+    <span class="stat-label">WPM</span>
+    <strong>{{ cs.wpmLocal() }}</strong>
+  </div>
+  <p-divider />
 
-        <div class="stat-card">
-          <span class="stat-icon">⚡</span>
-          <span class="stat-label">Progreso</span>
-          <span class="stat-value">{{ getEstadisticas().progreso }}%</span>
-        </div>
-      </div>
+  <!-- Errores -->
+  <div class="stat-row">
+    <span class="stat-icon">⚠</span>
+    <span class="stat-label">ERRORS</span>
+    <strong>{{ cs.erroresLocales() }}</strong>
+  </div>
+  <p-divider />
 
-      <!-- Barra de progreso -->
-      <div class="progress-section">
-        <div class="progress-label">
-          <span>Avance: {{ getEstadisticas().posicionActual }} / {{ getEstadisticas().totalCaracteres }}</span>
-        </div>
-        <div class="progress-bar-container">
-          <div
-            class="progress-bar-fill"
-            [style.width.%]="getEstadisticas().progreso">
-          </div>
-        </div>
-      </div>
+  <!-- Progreso -->
+  <div class="stat-col">
+    <div class="stat-row stat-row--no-border">
+      <span class="stat-icon">↗</span>
+      <span class="stat-label">PROGRESS</span>
+      <strong>{{ cs.porcentajeProgreso() }}%</strong>
+    </div>
+    <p-progressBar [value]="cs.porcentajeProgreso()" [showValue]="false" />
+  </div>
+  <p-divider />
 
-      <!-- Errores por tecla -->
-      <div class="errors-section" *ngIf="getEstadisticas().erroresPorTecla.length > 0">
-        <h3 class="section-title">📈 Errores por Tecla</h3>
-        <div class="errors-list">
-          <div class="error-item" *ngFor="let error of getEstadisticas().erroresPorTecla">
-            <span class="error-key">{{ error.tecla }}</span>
-            <span class="error-count">{{ error.totalError }} error{{ error.totalError !== 1 ? 'es' : '' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="no-errors" *ngIf="getEstadisticas().erroresPorTecla.length === 0">
-        ✨ ¡Ningún error registrado! Vas perfecto.
-      </div>
+  <!-- Errores por tecla -->
+  <div class="error-keys-section">
+    <div class="stat-row stat-row--no-border">
+      <span class="stat-icon">⌨</span>
+      <span class="stat-label">ERRORES POR TECLA</span>
     </div>
 
-    <!-- Footer del dialog -->
-    <ng-template pTemplate="footer">
-      <button
-        pButton
-        type="button"
-        label="Cerrar"
-        icon="pi pi-times"
-        (click)="cerrarEstadisticas()"
-        [text]="true">
-      </button>
-    </ng-template>
-  </p-dialog>
+    @if (errorKeys.length === 0) {
+      <p class="no-errors">Ningún error registrado</p>
+    } @else {
+      <div class="error-keys-grid">
+        @for (item of errorKeys; track item.key) {
+          <div
+            class="error-key-chip"
+            [pTooltip]="item.count + ' errores en esta tecla'"
+            tooltipPosition="top"
+          >
+            <kbd class="key-badge">{{ item.key }}</kbd>
+            <p-badge [value]="item.count.toString()" severity="danger" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Jugadores en sala -->
+  @if (cs.jugadoresOrdenados().length > 0) {
+    <p-divider />
+    <div class="stat-label">👥 Sala</div>
+    @for (j of cs.jugadoresOrdenados(); track j.usuario) {
+      <div class="jugador-row mt-2">
+        <small>{{ j.usuario }} — {{ j.wpm | number:'1.0-0' }} WPM</small>
+        <p-progressBar
+          [value]="cs.totalCaracteres() > 0 ? (j.posicion / cs.totalCaracteres()) * 100 : 0"
+          [style]="{ height: '4px' }"
+          [showValue]="false"
+        />
+      </div>
+    }
+  }
+
+</p-card>

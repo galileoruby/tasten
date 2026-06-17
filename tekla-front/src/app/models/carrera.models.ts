@@ -26,6 +26,7 @@ export interface EventoJugadorTermino {
   tiempo_segundos: number;
   precision: number;
   wpm: number;
+  posicion_ranking: number;
 }
 
 export interface EventoJugadorUnido {

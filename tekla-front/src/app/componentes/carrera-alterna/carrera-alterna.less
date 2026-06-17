@@ -1,22 +1,17 @@
-.char-correcto {
-  color: #22c55e;       /* verde */
-  font-weight: 600;
+.carrera-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  height: 100vh;
 }
 
-.char-error {
-  color: #ef4444;       /* rojo */
-  background-color: #fee2e2;
-  border-radius: 2px;
+.panel-stats {
+  overflow-y: auto;
 }
 
-.char-pending {
-  color: #94a3b8;       /* gris */
-}
-
-.texto-carrera {
-  font-family: 'Courier New', monospace;
-  font-size: 1.2rem;
-  line-height: 2;
-  letter-spacing: 0.05em;
-  user-select: none;    /* evita que el usuario copie el texto */
+.panel-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }

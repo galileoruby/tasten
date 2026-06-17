@@ -2,36 +2,40 @@
   <div class="grid p-fluid" style="text-align: right">
     <div class="col-12 md:col-6">
       <div class="field">
-        Errores {{ this.servicioCarrera.ContadorErrores }}
+        Errores <strong>{{ cs.erroresLocales() }}</strong>
       </div>
       <div class="field">
-        Precision
-        <strong> {{ this.servicioCarrera.calcularPrecision() }}%</strong>
+        Precisión <strong>{{ cs.precisionLocal() }}%</strong>
+      </div>
+      <div class="field">
+        WPM <strong>{{ cs.wpmLocal() }}</strong>
       </div>
     </div>
   </div>
 </p-fluid>
+
 <p-fluid>
   <div class="grid p-fluid">
     <div class="col-12 md:col-6">
       <div class="field">
         <input
           id="snorlax"
-          [disabled]="this.servicioCarrera.EsCarreraTerminada"
+          [disabled]="cs.carreraTerminada()"
           type="text"
           #inputFocus
           autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
           pInputText
-          [(ngModel)]="value"
           [class]="getInputClasses()"
           (keydown)="onKeyDown($event)"
-          (keyup)="onKeyUp($event)"
-          (keypress)="onKeyPress($event)"
-          (keydown.enter)="onEnterKey()"
-          (keydown.escape)="onEscapeKey()"
+          (input)="onInput($event)"
           autofocus
         />
       </div>
+      @if (cs.carreraTerminada()) {
+        <p class="text-green-500 font-bold">¡Carrera terminada!</p>
+      }
     </div>
   </div>
 </p-fluid>

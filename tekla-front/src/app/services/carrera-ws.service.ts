@@ -64,7 +64,7 @@ export class CarreraWsService implements OnDestroy {
   }
 
   progreso$(): Observable<EventoProgreso> {
-    return this.mensajes$().pipe(
+    return this.mensajes$().pipe( 
       filter((e): e is EventoProgreso => e.tipo === 'progreso')
     );
   }

@@ -1,38 +1,30 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { ServicioTexto } from '../../services/servicio-texto';
-import { Observable, Subscription } from 'rxjs';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { FluidModule } from 'primeng/fluid';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { TableModule } from "primeng/table";
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Card, CardModule } from 'primeng/card';
+import { Divider, DividerModule } from 'primeng/divider';
+import { BadgeModule } from 'primeng/badge';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { CarreraStateService } from '../../services/carrera-state.service';
+
 @Component({
   selector: 'app-estadisticas',
-  imports: [DialogModule, ButtonModule, CommonModule, TableModule],
+  standalone: true,
+  imports: [
+    CommonModule, Card, Divider,
+    BadgeModule, TooltipModule, ProgressBarModule,
+  ],
   templateUrl: './estadisticas.html',
   styleUrl: './estadisticas.less',
 })
 export class Estadisticas {
-  constructor(public servicioCarrera: ServicioTexto) {
-    this.servicioCarrera = servicioCarrera;
-  }
 
-  // Propiedades para el Dialog
-  mostrarEstadisticas: boolean = false;
+  // Un solo inject — sin constructor, sin Subscription
+  cs = inject(CarreraStateService);
 
-    cerrarEstadisticas(): void {
-    this.mostrarEstadisticas = false;
-  }
-
-    getEstadisticas() {
-    return {
-      precision: this.servicioCarrera.calcularPrecision(),
-      errores: this.servicioCarrera.ContadorErrores,
-      totalCaracteres: this.servicioCarrera.estadisticas.totalCaracteresLeccion,
-      posicionActual: this.servicioCarrera.estadisticas.posicionActual,
-      progreso: ((this.servicioCarrera.estadisticas.posicionActual / this.servicioCarrera.estadisticas.totalCaracteresLeccion) * 100).toFixed(1),
-      erroresPorTecla: this.servicioCarrera.estadisticas.errorPorTecla
-    };
+  // Computed local para el template de errores por tecla
+  get errorKeys(): { key: string; count: number }[] {
+    return this.cs.errorPorTecla()
+      .map(e => ({ key: e.tecla, count: e.cantidad }));
   }
 }

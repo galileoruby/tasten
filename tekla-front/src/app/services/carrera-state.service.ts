@@ -37,15 +37,21 @@ export class CarreraStateService implements OnDestroy {
   jugadores          = signal<Map<string, JugadorSala>>(new Map());
 
   // ── Computed ──
-  porcentajeProgreso = computed(() =>
-    this.totalCaracteres() > 0
-      ? Math.round((this.posicionLocal() / this.totalCaracteres()) * 100)
-      : 0
-  );
+  porcentajeProgreso = computed(() => {
+    const total = this.totalCaracteres();
+    if (total <= 0) return 0;
+
+    const progreso = this.carreraTerminada()
+      ? 100
+      : this.posicionLocal() / total;
+
+    return Math.min(100, Math.round(progreso * 100));
+  });
 
   precisionLocal = computed(() => {
-    if (this.posicionLocal() === 0) return 100;
-    return Math.round((this.caracteresCorrectos() / this.posicionLocal()) * 100);
+    const totalIntentos = this.caracteresCorrectos() + this.erroresLocales();
+    if (totalIntentos === 0) return 100;
+    return Math.round((this.caracteresCorrectos() / totalIntentos) * 100);
   });
 
   wpmLocal = computed(() => {
@@ -152,7 +158,7 @@ export class CarreraStateService implements OnDestroy {
     });
 
     // Verificar si terminó
-    if (this.posicionLocal() === texto.length) {
+    if (this.posicionLocal() >= texto.length) {
       this.terminar();
     }
   }

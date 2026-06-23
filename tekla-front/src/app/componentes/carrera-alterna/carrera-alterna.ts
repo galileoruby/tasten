@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Carrera } from '../carrera/carrera';           // tu componente leccion
 import { Keyboard } from '../keyboard/keyboard';
 import { Estadisticas } from '../estadisticas/estadisticas';
+import {UsuariosEstadisticas} from '../usuarios-estadisticas/usuarios-estadisticas'
 import { CarreraStateService } from '../../services/carrera-state.service';
 
 interface EstadoJugador {
@@ -22,7 +23,8 @@ interface EstadoJugador {
   imports: [
     Carrera,
     Keyboard,
-    Estadisticas
+    Estadisticas,
+    UsuariosEstadisticas
   ],
   templateUrl: './carrera-alterna.html',
   styleUrl: './carrera-alterna.less',

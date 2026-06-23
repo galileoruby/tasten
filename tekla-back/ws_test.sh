@@ -37,3 +37,24 @@ websocat "ws://127.0.0.1:3000/ws/sala2?usuario=carlos"
 # npm install -g wscat
 # wscat -c "ws://127.0.0.1:3000/ws/sala1?usuario=ana"
 # ─────────────────────────────────────────────
+
+
+#progreso actual
+{
+  "tipo": "progreso",
+  "posicion": 90,
+  "errores": 2,
+  "caracteres_correctos": 100,
+  "tiempo_inicio_ms": 1710000000000
+}
+
+
+# termino
+{
+  "tipo": "jugador_termino",
+  "usuario": "eminem",
+  "tiempo_segundos": 42,
+  "precision": 100.0,
+  "wpm": 35.5,
+  "posicion_ranking": 3
+}

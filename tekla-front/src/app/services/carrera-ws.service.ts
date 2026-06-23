@@ -25,6 +25,7 @@ export class CarreraWsService implements OnDestroy {
     // Si ya hay una conexión abierta, cerrarla primero
     this.desconectar();
 
+    console.log(`[WS] Conectando a sala=${salaId} como usuario=${usuario}...`);
     this.socket$ = webSocket<any>({
       url: `${this.URL_BASE}/${salaId}?usuario=${usuario}`,
 

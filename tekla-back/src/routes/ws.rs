@@ -21,11 +21,22 @@ pub enum MensajeCliente {
         caracteres_correctos: u16,
         tiempo_inicio_ms: i64,
     },
+    #[serde(alias = "jugador_termino")]
     Termino {
+        #[serde(default)]
         tiempo_segundos: i64,
+        #[serde(default)]
         errores: u16,
+        #[serde(default)]
         caracteres_correctos: u16,
+        #[serde(default)]
         total_caracteres: u16,
+        #[serde(default)]
+        precision: f64,
+        #[serde(default)]
+        wpm: f64,
+        #[serde(default)]
+        posicion_ranking: usize,
     },
 }
 
@@ -118,11 +129,15 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
                     let _ = tx_clone.send(serde_json::to_string(&evento).unwrap());
                 }
 
-                Ok(MensajeCliente::Termino { tiempo_segundos, errores, caracteres_correctos, total_caracteres }) => {
-                    let wpm = if tiempo_segundos > 0 {
+                Ok(MensajeCliente::Termino { tiempo_segundos, errores: _, caracteres_correctos, total_caracteres, precision, wpm, posicion_ranking: _ }) => {
+                    let wpm = if wpm > 0.0 {
+                        wpm
+                    } else if tiempo_segundos > 0 {
                         (caracteres_correctos as f64 / 5.0) / (tiempo_segundos as f64 / 60.0)
                     } else { 0.0 };
-                    let precision = if total_caracteres > 0 {
+                    let precision = if precision > 0.0 {
+                        precision
+                    } else if total_caracteres > 0 {
                         (caracteres_correctos as f64 / total_caracteres as f64) * 100.0
                     } else { 0.0 };
 
@@ -162,4 +177,36 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
     let evento_salida = EventoSala::JugadorSalio { usuario: usuario.clone() };
     let _ = tx.send(serde_json::to_string(&evento_salida).unwrap());
     info!("WS cerrado: sala={} usuario={}", room_id, usuario);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserializa_termino_con_payload_cliente() {
+        let raw = r#"{
+            "tipo": "jugador_termino",
+            "usuario": "eminem",
+            "tiempo_segundos": 42,
+            "precision": 100.0,
+            "wpm": 35.5,
+            "posicion_ranking": 3
+        }"#;
+
+        let mensaje: MensajeCliente = serde_json::from_str(raw).unwrap();
+
+        match mensaje {
+            MensajeCliente::Termino { tiempo_segundos, errores, caracteres_correctos, total_caracteres, precision, wpm, posicion_ranking } => {
+                assert_eq!(tiempo_segundos, 42);
+                assert_eq!(errores, 0);
+                assert_eq!(caracteres_correctos, 0);
+                assert_eq!(total_caracteres, 0);
+                assert_eq!(precision, 100.0);
+                assert_eq!(wpm, 35.5);
+                assert_eq!(posicion_ranking, 3);
+            }
+            other => panic!("se esperaba Termino, se obtuvo {:?}", other),
+        }
+    }
 }

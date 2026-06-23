@@ -1,0 +1,55 @@
+<p-card styleClass="usuarios-card">
+  <ng-template #header>
+    <div class="card-header">
+      <span class="title">Usuarios y estadísticas</span>
+      <p-badge [value]="otrosUsuarios.length.toString()" severity="info" />
+    </div>
+  </ng-template>
+
+  @if (otrosUsuarios.length === 0) {
+    <div class="empty-state">
+      <span>No hay otros usuarios en la sala todavía.</span>
+    </div>
+  } @else {
+    <p-table
+      [value]="otrosUsuarios"
+      [tableStyle]="{ 'min-width': '100%' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Usuario</th>
+          <th>WPM</th>
+          <th>Precisión</th>
+          <th>Errores</th>
+          <th>Progreso</th>
+          <th>Estado</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-jugador>
+        <tr>
+          <td>{{ jugador.usuario }}</td>
+          <td>{{ jugador.wpm | number: '1.0-0' }}</td>
+          <td>{{ jugador.precision | number: '1.0-0' }}%</td>
+          <td>{{ jugador.errores }}</td>
+          <td>
+            <div class="progress-cell">
+              <p-progressBar
+                [value]="progresoPercent(jugador.posicion)"
+                [showValue]="false"
+              />
+              <span>{{ progresoPercent(jugador.posicion) }}%</span>
+            </div>
+          </td>
+          <td>
+            <p-badge
+              [value]="estadoJugador(jugador)"
+              [severity]="severidadJugador(jugador)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</p-card>

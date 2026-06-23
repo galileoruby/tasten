@@ -12,9 +12,9 @@ import {CarreraAlterna} from '../carrera-alterna/carrera-alterna';
   imports: [
     
     TabsModule,
-    Keyboard,
+    
     BreadcrumbModule,
-    Carrera,
+    
     CarreraAlterna
   ],
   templateUrl: './header.html',

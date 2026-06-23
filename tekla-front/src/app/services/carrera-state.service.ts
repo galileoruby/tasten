@@ -6,6 +6,7 @@ export interface ErrorTecla { tecla: string; cantidad: number; }
 export interface JugadorSala {
   usuario: string; posicion: number; errores: number;
   precision: number; wpm: number; terminado: boolean;
+  abandonado: boolean;
   tiempo_segundos?: number;
 }
 
@@ -87,7 +88,7 @@ export class CarreraStateService implements OnDestroy {
         m.set(e.usuario, {
           usuario: e.usuario, posicion: e.posicion,
           errores: e.errores, precision: e.precision,
-          wpm: e.wpm, terminado: false,
+          wpm: e.wpm, terminado: false, abandonado: false,
         });
         this.jugadores.set(m);
       })
@@ -99,9 +100,9 @@ export class CarreraStateService implements OnDestroy {
         const m = new Map(this.jugadores());
         const j = m.get(e.usuario) ?? {
           usuario: e.usuario, posicion: this.totalCaracteres(),
-          errores: 0, precision: e.precision, wpm: e.wpm, terminado: false,
+          errores: 0, precision: e.precision, wpm: e.wpm, terminado: false, abandonado: false,
         };
-        m.set(e.usuario, { ...j, terminado: true,
+        m.set(e.usuario, { ...j, terminado: true, abandonado: false,
           tiempo_segundos: e.tiempo_segundos, wpm: e.wpm, precision: e.precision });
         this.jugadores.set(m);
       })
@@ -111,7 +112,10 @@ export class CarreraStateService implements OnDestroy {
     this.subs.add(
       this.ws.jugadorSalio$().subscribe(e => {
         const m = new Map(this.jugadores());
-        m.delete(e.usuario);
+        const jugador = m.get(e.usuario);
+        if (jugador) {
+          m.set(e.usuario, { ...jugador, abandonado: true });
+        }
         this.jugadores.set(m);
       })
     );

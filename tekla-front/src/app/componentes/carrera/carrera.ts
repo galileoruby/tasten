@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation, inject, effect } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FluidModule } from 'primeng/fluid';
 import { CarreraStateService } from '../../services/carrera-state.service';
+import { Badge } from "primeng/badge";
 
 @Component({
   selector: 'app-carrera',

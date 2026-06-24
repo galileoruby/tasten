@@ -3,14 +3,14 @@ use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 
 /// Banco de párrafos para las lecciones de typing
 const PARRAFOS: &[&str] = &[
-    "Sin conexion",
-    "loprem sw",
-    "El código limpio siempre....",
-    "La q@43298@",
-    "Aprender a programar es aprender ....",
-    "Todo programa tiene al menos un error.",
-    "El mejor código es por cualquier desarrollador.",
-    "La experiencia es  programa por primera vez.",
+    "La programación es el arte de decirle a otra persona lo que quieres que haga la computadora.",
+    "Rust es un lenguaje de programación enfocado en seguridad, velocidad y concurrencia sin necesidad de un recolector de basura.",
+    "El código limpio siempre parece que fue escrito por alguien a quien le importa lo que hace.",
+    "La simplicidad es la sofisticación máxima en el diseño de software moderno.",
+    "Aprender a programar es aprender a pensar de una manera completamente nueva y estructurada.",
+    "Todo programa tiene al menos un error y puede ser reducido en una línea. Por lo tanto, todo programa puede ser reducido a un error.",
+    "El mejor código es el que no necesita comentarios para ser entendido por cualquier desarrollador.",
+    "La experiencia es el nombre que la gente le da a sus errores cuando programa por primera vez.",
 ];
 
 #[derive(Debug, sqlx::FromRow)]

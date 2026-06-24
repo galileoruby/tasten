@@ -27,6 +27,12 @@ export interface EventoJugadorTermino {
   precision: number;
   wpm: number;
   posicion_ranking: number;
+  errores?: ErrorTecla[];
+}
+
+export interface ErrorTecla {
+  tecla: string;
+  cantidad: number;
 }
 
 export interface EventoJugadorUnido {
@@ -70,7 +76,7 @@ export interface MensajeProgreso {
 export interface MensajeTermino {
   tipo: 'termino';
   tiempo_segundos: number;
-  errores: number;
+  errores: ErrorTecla[];
   caracteres_correctos: number;
   total_caracteres: number;
 }

@@ -1,15 +1,19 @@
-use axum::{routing::get,Json,Router};
+use axum::{http::StatusCode, routing::get, Json, Router};
 
 use crate::{
-    middleware::auth::AuthUser,
     models::carrera::LeccionResponse,
     services::carrera::obtener_leccion_aleatoria,
 };
 
 /// GET /api/carrera/leccion — protegida, requiere JWT
-// pub async fn leccion(_auth: AuthUser) -> Json<LeccionResponse> {
-pub async fn leccion() -> Json<LeccionResponse> {
-    Json(obtener_leccion_aleatoria())
+pub async fn leccion() -> Result<Json<LeccionResponse>, (StatusCode, String)> {
+    match obtener_leccion_aleatoria().await {
+        Ok(leccion) => Ok(Json(leccion)),
+        Err(error) => {
+            tracing::error!("No se pudo obtener la lección: {error}");
+            Err((StatusCode::INTERNAL_SERVER_ERROR, "No se pudo cargar la lección".to_string()))
+        }
+    }
 }
 
 pub fn router_leccion() -> Router {

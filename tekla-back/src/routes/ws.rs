@@ -1,15 +1,27 @@
+use crate::{
+    services::carrera::{guardar_error, guardar_progreso},
+    state::{AppState, EventoSala},
+};
 use axum::{
-    extract::{ws::{Message, WebSocket}, Path, Query, State, WebSocketUpgrade},
+    extract::{
+        ws::{Message, WebSocket},
+        Path, Query, State, WebSocketUpgrade,
+    },
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
 use tracing::{info, warn};
-use crate::state::{AppState, EventoSala};
 
 #[derive(Deserialize)]
 pub struct WsParams {
     pub usuario: String,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct ErrorDetalle {
+    pub tecla: String,
+    pub cantidad: u16,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -26,7 +38,7 @@ pub enum MensajeCliente {
         #[serde(default)]
         tiempo_segundos: i64,
         #[serde(default)]
-        errores: u16,
+        errores: Vec<ErrorDetalle>,
         #[serde(default)]
         caracteres_correctos: u16,
         #[serde(default)]
@@ -52,7 +64,7 @@ pub async fn ws_handler(
 }
 
 async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, state: AppState) {
-    let tx = state.obtener_o_crear_sala(&room_id);
+    let tx = state.obtener_o_crear_sala(&room_id).await;
     let mut rx = tx.subscribe();
 
     // Registrar jugador en la sala
@@ -62,46 +74,63 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
 
     // Enviar texto de la carrera
     if let Some((id, texto)) = state.texto_sala(&room_id) {
-        let palabras   = texto.split_whitespace().count();
+        let palabras = texto.split_whitespace().count();
         let caracteres = texto.len();
-        let evento = EventoSala::TextoCarrera { id, texto, caracteres, palabras };
-        let _ = sink.send(Message::Text(serde_json::to_string(&evento).unwrap().into())).await;
+        let evento = EventoSala::TextoCarrera {
+            id,
+            texto,
+            caracteres,
+            palabras,
+        };
+        let _ = sink
+            .send(Message::Text(
+                serde_json::to_string(&evento).unwrap().into(),
+            ))
+            .await;
     }
 
     // Notificar entrada — incluye snapshot del estado actual de la sala
     // Un jugador tardío ve el progreso de los demás inmediatamente
-    let estado_sala  = state.estado_jugadores(&room_id);
-    let total        = state.total_jugadores(&room_id);
+    let estado_sala = state.estado_jugadores(&room_id);
+    let total = state.total_jugadores(&room_id);
     let evento_entrada = EventoSala::JugadorUnido {
         usuario: usuario.clone(),
         total_jugadores: total,
-        estado_sala,   // <-- snapshot
+        estado_sala, // <-- snapshot
     };
     let _ = tx.send(serde_json::to_string(&evento_entrada).unwrap());
 
     // Task: broadcast → cliente
     let mut recv_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
-            if sink.send(Message::Text(msg.into())).await.is_err() { break; }
+            if sink.send(Message::Text(msg.into())).await.is_err() {
+                break;
+            }
         }
     });
 
     // Task: cliente → broadcast
     let usuario_clone = usuario.clone();
-    let room_clone    = room_id.clone();
-    let state_clone   = state.clone();
-    let tx_clone      = tx.clone();
+    let room_clone = room_id.clone();
+    let state_clone = state.clone();
+    let tx_clone = tx.clone();
 
     let mut send_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = stream.next().await {
             let Message::Text(txt) = msg else {
-                if matches!(msg, Message::Close(_)) { break; }
+                if matches!(msg, Message::Close(_)) {
+                    break;
+                }
                 continue;
             };
 
             match serde_json::from_str::<MensajeCliente>(&txt) {
-
-                Ok(MensajeCliente::Progreso { posicion, errores, caracteres_correctos, tiempo_inicio_ms }) => {
+                Ok(MensajeCliente::Progreso {
+                    posicion,
+                    errores,
+                    caracteres_correctos,
+                    tiempo_inicio_ms,
+                }) => {
                     let elapsed_s = {
                         let now_ms = chrono::Utc::now().timestamp_millis();
                         ((now_ms - tiempo_inicio_ms).max(1) as f64) / 1000.0
@@ -112,8 +141,12 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
 
                     // Guardar en memoria
                     state_clone.actualizar_progreso(
-                        &room_clone, &usuario_clone,
-                        posicion, errores, precision, wpm,
+                        &room_clone,
+                        &usuario_clone,
+                        posicion,
+                        errores,
+                        precision,
+                        wpm,
                     );
 
                     info!(
@@ -123,27 +156,90 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
 
                     let evento = EventoSala::Progreso {
                         usuario: usuario_clone.clone(),
-                        posicion, errores, precision, wpm,
+                        posicion,
+                        errores,
+                        precision,
+                        wpm,
                     };
                     let _ = tx_clone.send(serde_json::to_string(&evento).unwrap());
                 }
 
-                Ok(MensajeCliente::Termino { tiempo_segundos, errores: _, caracteres_correctos, total_caracteres, precision, wpm, posicion_ranking: _ }) => {
+                Ok(MensajeCliente::Termino {
+                    tiempo_segundos,
+                    errores,
+                    caracteres_correctos,
+                    total_caracteres,
+                    precision,
+                    wpm,
+                    posicion_ranking: _,
+                }) => {
                     let wpm = if wpm > 0.0 {
                         wpm
                     } else if tiempo_segundos > 0 {
                         (caracteres_correctos as f64 / 5.0) / (tiempo_segundos as f64 / 60.0)
-                    } else { 0.0 };
+                    } else {
+                        0.0
+                    };
                     let precision = if precision > 0.0 {
                         precision
                     } else if total_caracteres > 0 {
                         (caracteres_correctos as f64 / total_caracteres as f64) * 100.0
-                    } else { 0.0 };
+                    } else {
+                        0.0
+                    };
+
+                    if let Some((leccion_id, _)) = state_clone.texto_sala(&room_clone) {
+                        let db_path = std::env::current_dir()
+                            .unwrap_or_else(|_| std::path::PathBuf::from("."))
+                            .join("db")
+                            .join("tastendb.sqlite");
+                        let options = sqlx::sqlite::SqliteConnectOptions::new()
+                            .filename(&db_path)
+                            .create_if_missing(true);
+                        if let Ok(pool) = sqlx::SqlitePool::connect_with(options).await {
+                            if let Err(error) = guardar_progreso(
+                                &pool,
+                                leccion_id,
+                                &usuario_clone,
+                                0,
+                                0,
+                                caracteres_correctos,
+                                tiempo_segundos as i64,
+                            )
+                            .await
+                            {
+                                warn!(
+                                    "No se pudo guardar progreso para {}: {error}",
+                                    usuario_clone
+                                );
+                            }
+
+                            for error_detalle in &errores {
+                                if let Err(error) = guardar_error(
+                                    &pool,
+                                    leccion_id,
+                                    &usuario_clone,
+                                    &error_detalle.tecla,
+                                    error_detalle.cantidad,
+                                )
+                                .await
+                                {
+                                    warn!(
+                                        "No se pudo guardar error para {}: {error}",
+                                        usuario_clone
+                                    );
+                                }
+                            }
+                        }
+                    }
 
                     // Guardar resultado final y obtener posición en ranking
                     let ranking = state_clone.marcar_terminado(
-                        &room_clone, &usuario_clone,
-                        tiempo_segundos, precision, wpm,
+                        &room_clone,
+                        &usuario_clone,
+                        tiempo_segundos,
+                        precision,
+                        wpm,
                     );
 
                     info!(
@@ -153,14 +249,19 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
 
                     let evento = EventoSala::JugadorTermino {
                         usuario: usuario_clone.clone(),
-                        tiempo_segundos, precision, wpm,
+                        tiempo_segundos,
+                        precision,
+                        wpm,
                         posicion_ranking: ranking,
                     };
                     let _ = tx_clone.send(serde_json::to_string(&evento).unwrap());
                 }
 
                 Err(e) => {
-                    warn!("Mensaje inválido de {}: {} — raw: {}", usuario_clone, e, txt);
+                    warn!(
+                        "Mensaje inválido de {}: {} — raw: {}",
+                        usuario_clone, e, txt
+                    );
                 }
             }
         }
@@ -173,7 +274,9 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
 
     // Limpiar jugador y notificar salida
     state.remover_jugador(&room_id, &usuario);
-    let evento_salida = EventoSala::JugadorSalio { usuario: usuario.clone() };
+    let evento_salida = EventoSala::JugadorSalio {
+        usuario: usuario.clone(),
+    };
     let _ = tx.send(serde_json::to_string(&evento_salida).unwrap());
     info!("WS cerrado: sala={} usuario={}", room_id, usuario);
 }
@@ -188,6 +291,10 @@ mod tests {
             "tipo": "jugador_termino",
             "usuario": "eminem",
             "tiempo_segundos": 42,
+            "errores": [
+                { "tecla": "a", "cantidad": 2 },
+                { "tecla": "s", "cantidad": 1 }
+            ],
             "precision": 100.0,
             "wpm": 35.5,
             "posicion_ranking": 3
@@ -196,9 +303,21 @@ mod tests {
         let mensaje: MensajeCliente = serde_json::from_str(raw).unwrap();
 
         match mensaje {
-            MensajeCliente::Termino { tiempo_segundos, errores, caracteres_correctos, total_caracteres, precision, wpm, posicion_ranking } => {
+            MensajeCliente::Termino {
+                tiempo_segundos,
+                errores,
+                caracteres_correctos,
+                total_caracteres,
+                precision,
+                wpm,
+                posicion_ranking,
+            } => {
                 assert_eq!(tiempo_segundos, 42);
-                assert_eq!(errores, 0);
+                assert_eq!(errores.len(), 2);
+                assert_eq!(errores[0].tecla, "a");
+                assert_eq!(errores[0].cantidad, 2);
+                assert_eq!(errores[1].tecla, "s");
+                assert_eq!(errores[1].cantidad, 1);
                 assert_eq!(caracteres_correctos, 0);
                 assert_eq!(total_caracteres, 0);
                 assert_eq!(precision, 100.0);

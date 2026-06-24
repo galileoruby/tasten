@@ -88,17 +88,28 @@ impl AppState {
         Self { salas: Arc::new(DashMap::new()) }
     }
 
-    pub fn obtener_o_crear_sala(&self, room_id: &str) -> broadcast::Sender<String> {
+    pub async fn obtener_o_crear_sala(&self, room_id: &str) -> broadcast::Sender<String> {
         if let Some(sala) = self.salas.get(room_id) {
             return sala.tx.clone();
         }
-        let leccion = crate::services::carrera::obtener_leccion_aleatoria();
+
+        let leccion = crate::services::carrera::obtener_leccion_aleatoria().await
+            .unwrap_or_else(|error| {
+                tracing::warn!("No se pudo cargar la lección desde la BD: {error}");
+                crate::models::carrera::LeccionResponse {
+                    id: 0,
+                    texto: "No se pudo cargar la lección".to_string(),
+                    caracteres: 0,
+                    palabras: 0,
+                }
+            });
+
         let (tx, _) = broadcast::channel(64);
         self.salas.insert(room_id.to_string(), Sala {
             tx: tx.clone(),
             leccion_id: leccion.id,
             texto: leccion.texto,
-            jugadores: DashMap::new(), // <-- mapa de jugadores vacío
+            jugadores: DashMap::new(),
         });
         tx
     }

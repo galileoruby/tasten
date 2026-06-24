@@ -14,7 +14,7 @@ export interface JugadorSala {
 export class CarreraStateService implements OnDestroy {
 
   // ── Configuración (en el futuro vendrá del auth/lobby) ──
-  readonly usuario = 'ana';
+  readonly usuario = 'alex';
   readonly salaId  = `sala-${Math.floor(Math.random() * 50) + 1}`;
 
   private subs = new Subscription();
@@ -120,8 +120,23 @@ export class CarreraStateService implements OnDestroy {
           usuario: e.usuario, posicion: this.totalCaracteres(),
           errores: 0, precision: e.precision, wpm: e.wpm, terminado: false, abandonado: false,
         };
-        m.set(e.usuario, { ...j, terminado: true, abandonado: false,
-          tiempo_segundos: e.tiempo_segundos, wpm: e.wpm, precision: e.precision });
+
+        const erroresTotales = e.errores?.reduce((sum, item) => sum + item.cantidad, 0) ?? 0;
+
+        m.set(e.usuario, {
+          ...j,
+          terminado: true,
+          abandonado: false,
+          tiempo_segundos: e.tiempo_segundos,
+          wpm: e.wpm,
+          precision: e.precision,
+          errores: erroresTotales,
+        });
+
+        if (e.errores?.length) {
+          this.errorPorTecla.set(e.errores);
+        }
+
         this.jugadores.set(m);
       })
     );
@@ -196,7 +211,7 @@ export class CarreraStateService implements OnDestroy {
     this.ws.enviar({
       tipo: 'termino',
       tiempo_segundos: tiempoSegundos,
-      errores: this.erroresLocales(),
+      errores: this.errorPorTecla(),
       caracteres_correctos: this.caracteresCorrectos(),
       total_caracteres: this.totalCaracteres(),
     });

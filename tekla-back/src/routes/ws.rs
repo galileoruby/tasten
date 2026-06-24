@@ -106,10 +106,9 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
                         let now_ms = chrono::Utc::now().timestamp_millis();
                         ((now_ms - tiempo_inicio_ms).max(1) as f64) / 1000.0
                     };
-                    let wpm       = (caracteres_correctos as f64 / 5.0) / (elapsed_s / 60.0);
-                    let precision = if posicion > 0 {
-                        (caracteres_correctos as f64 / posicion as f64) * 100.0
-                    } else { 100.0 };
+                    let wpm = (caracteres_correctos as f64 / 5.0) / (elapsed_s / 60.0);
+                    let total_intentos = (caracteres_correctos as u32 + errores as u32).max(1);
+                    let precision = (caracteres_correctos as f64 / total_intentos as f64) * 100.0;
 
                     // Guardar en memoria
                     state_clone.actualizar_progreso(
@@ -118,8 +117,8 @@ async fn manejar_socket(socket: WebSocket, room_id: String, usuario: String, sta
                     );
 
                     info!(
-                        "[PROGRESO] sala={} usuario={} pos={} err={} wpm={:.1} prec={:.1}%",
-                        room_clone, usuario_clone, posicion, errores, wpm, precision
+                        "[PROGRESO] sala={} usuario={} pos={} err={} wpm={:.1} precision={:.4} precision_pct={:.1}%",
+                        room_clone, usuario_clone, posicion, errores, wpm, precision, precision
                     );
 
                     let evento = EventoSala::Progreso {

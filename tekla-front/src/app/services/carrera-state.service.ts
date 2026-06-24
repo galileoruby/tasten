@@ -94,6 +94,24 @@ export class CarreraStateService implements OnDestroy {
       })
     );
 
+    // Jugador se unió
+    this.subs.add(
+      this.ws.jugadorUnido$().subscribe(e => {
+        const m = new Map(this.jugadores());
+        const jugadorExistente = m.get(e.usuario);
+        m.set(e.usuario, {
+          usuario: e.usuario,
+          posicion: jugadorExistente?.posicion ?? 0,
+          errores: jugadorExistente?.errores ?? 0,
+          precision: jugadorExistente?.precision ?? 0,
+          wpm: jugadorExistente?.wpm ?? 0,
+          terminado: jugadorExistente?.terminado ?? false,
+          abandonado: jugadorExistente?.abandonado ?? false,
+        });
+        this.jugadores.set(m);
+      })
+    );
+
     // Jugador terminó
     this.subs.add(
       this.ws.jugadorTermino$().subscribe(e => {
